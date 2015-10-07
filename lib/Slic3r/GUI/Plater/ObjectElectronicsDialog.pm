@@ -33,16 +33,19 @@ use utf8;
 
 use Slic3r::Print::State ':steps';
 use File::Basename qw(basename);
-use Wx qw(:misc :sizer :slider :treectrl :button wxTAB_TRAVERSAL wxSUNKEN_BORDER wxBITMAP_TYPE_PNG
+use Wx qw(:misc :sizer :slider :treectrl :button :filedialog wxTAB_TRAVERSAL wxSUNKEN_BORDER wxBITMAP_TYPE_PNG wxFD_OPEN wxFD_FILE_MUST_EXIST wxID_OK
     wxTheApp);
 use Wx::Event qw(EVT_BUTTON EVT_TREE_ITEM_COLLAPSING EVT_TREE_SEL_CHANGED EVT_SLIDER);
+use Slic3r::Electronics::Electronics;
 use base qw(Wx::Panel Class::Accessor);
+
 
 __PACKAGE__->mk_accessors(qw(print enabled _loaded canvas slider));
 
 use constant ICON_OBJECT        => 0;
 use constant ICON_SOLIDMESH     => 1;
 use constant ICON_MODIFIERMESH  => 2;
+use constant ICON_PCB           => 3;
 
 sub new {
     my $class = shift;
@@ -50,6 +53,7 @@ sub new {
     my $self = $class->SUPER::new($parent, -1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     
     my $object = $self->{model_object} = $params{model_object};
+    my @schematic = @{$self->{schematic}} = ();
     
     # upper buttons
     my $btn_load_netlist = $self->{btn_load_netlist} = Wx::Button->new($self, -1, "Load netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
@@ -70,6 +74,7 @@ sub new {
         $self->{tree_icons}->Add(Wx::Bitmap->new("$Slic3r::var/brick.png", wxBITMAP_TYPE_PNG));     # ICON_OBJECT
         $self->{tree_icons}->Add(Wx::Bitmap->new("$Slic3r::var/package.png", wxBITMAP_TYPE_PNG));   # ICON_SOLIDMESH
         $self->{tree_icons}->Add(Wx::Bitmap->new("$Slic3r::var/plugin.png", wxBITMAP_TYPE_PNG));    # ICON_MODIFIERMESH
+        $self->{tree_icons}->Add(Wx::Bitmap->new("$Slic3r::var/PCB-icon.png", wxBITMAP_TYPE_PNG));  # ICON_PCB
         
         my $rootId = $tree->AddRoot("Object", ICON_OBJECT);
         $tree->SetPlData($rootId, { type => 'object' });
@@ -228,6 +233,12 @@ sub load_print {
             $self->canvas->load_print_object_toolpaths($object);
             
         }
+        
+        #foreach my $object (@{$self->print->objects}) {
+        #    $self->canvas->load_object($self->{model_object}, undef, [0]);
+        #    
+        #}
+        
         $self->canvas->zoom_to_volumes;
         $self->_loaded(1);
     }
@@ -274,6 +285,22 @@ sub reload_tree {
             type        => 'volume',
             volume_id   => $volume_id,
         });
+    }
+    my $length = @{$self->{schematic}};
+    if ($length > 0) {
+        my $eIcon = ICON_PCB;
+        my $eItemId = $tree->AppendItem($rootId, "Electronics", $eIcon);
+        $tree->SetPlData($eItemId, {
+            type        => 'volume',
+            volume_id   => 0,
+        });
+        foreach my $part (@{$self->{schematic}}) {
+            my $ItemId = $tree->AppendItem($eItemId, $part->{name}, $eIcon);
+            $tree->SetPlData($ItemId, {
+                type        => 'volume',
+                volume_id   => 0,
+            });
+        }
     }
     $tree->ExpandAll;
     
@@ -342,9 +369,27 @@ sub selection_changed {
     $self->{canvas}->Render if $self->{canvas};
 }
 
+
 # Load button event
 sub LoadButtenPressed {
-    print "Load pressed\n"
+    my $self = shift;
+    my ($file) = @_;
+    
+    if (!$file) {
+        #my $dir = $last_config ? dirname($last_config) : $Slic3r::GUI::Settings->{recent}{config_directory} || $Slic3r::GUI::Settings->{recent}{skein_directory} || '';
+        my $dlg = Wx::FileDialog->new(
+            $self, 
+            'Select schematic to load:',
+            '',
+            '',
+            &Slic3r::GUI::FILE_WILDCARDS->{sch}, 
+            wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        return unless $dlg->ShowModal == wxID_OK;
+        $file = Slic3r::decode_path($dlg->GetPaths);
+        $dlg->Destroy;
+    }
+    @{$self->{schematic}} = Slic3r::Electronics::Electronics->readFile($file);
+    $self->reload_tree;
 }
 
 # Save button event
