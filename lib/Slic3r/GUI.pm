@@ -44,7 +44,7 @@ use constant FILE_WILDCARDS => {
     ini     => 'INI files *.ini|*.ini;*.INI',
     gcode   => 'G-code files (*.gcode, *.gco, *.g, *.ngc)|*.gcode;*.GCODE;*.gco;*.GCO;*.g;*.G;*.ngc;*.NGC',
     svg     => 'SVG files *.svg|*.svg;*.SVG',
-    sch     => 'SCH files *.sch|*.sch;*.SCH',
+    sch     => 'Schematic files (*.sch, *.3de)|*.sch;*.SCH;*.3de;*.3DE',
 };
 use constant MODEL_WILDCARD => join '|', @{&FILE_WILDCARDS}{qw(known stl obj amf)};
 

@@ -965,9 +965,10 @@ sub new {
 }
 
 sub load_object {
-    my ($self, $model, $obj_idx, $instance_idxs) = @_;
+    my ($self, $model, $obj_idx, $instance_idxs, $v_idxs) = @_;
     
     my $model_object;
+
     if ($model->isa('Slic3r::Model::Object')) {
         $model_object = $model;
         $model = $model_object->model;
@@ -979,7 +980,15 @@ sub load_object {
     $instance_idxs ||= [0..$#{$model_object->instances}];
     
     my @volumes_idx = ();
-    foreach my $volume_idx (0..$#{$model_object->volumes}) {
+    
+    my @idx = ();
+    if ($v_idxs){
+        @idx = @$v_idxs;
+    }else {
+        @idx = (0..$#{$model_object->volumes});
+    }
+
+    foreach my $volume_idx (@idx) {
         my $volume = $model_object->volumes->[$volume_idx];
         foreach my $instance_idx (@$instance_idxs) {
             my $instance = $model_object->instances->[$instance_idx];
