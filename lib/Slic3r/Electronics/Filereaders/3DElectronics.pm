@@ -37,7 +37,7 @@ sub readFile {
             @position = ($pos->getAttribute('X'),$pos->getAttribute('Y'),$pos->getAttribute('Z'));
         }
         for my $rot ($node->findnodes('./rotation')) {
-            @rotation = ($rot->getAttribute('roll'),$rot->getAttribute('pitch'),$rot->getAttribute('yaw'));
+            @rotation = ($rot->getAttribute('X'),$rot->getAttribute('Y'),$rot->getAttribute('Z'));
         }
         for my $part (@partlist) {
             if (($part->{name} eq $name) && 
@@ -91,9 +91,9 @@ sub writeFile {
             
             my $rot = $dom->createElement('rotation');
             $node->addChild($rot);
-            $rot->addChild($dom->createAttribute( roll => $part->{rotation}[0]));
-            $rot->addChild($dom->createAttribute( pitch => $part->{rotation}[1]));
-            $rot->addChild($dom->createAttribute( yaw => $part->{rotation}[2]));
+            $rot->addChild($dom->createAttribute( X => $part->{rotation}[0]));
+            $rot->addChild($dom->createAttribute( Y => $part->{rotation}[1]));
+            $rot->addChild($dom->createAttribute( Z => $part->{rotation}[2]));
         }
     }
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));

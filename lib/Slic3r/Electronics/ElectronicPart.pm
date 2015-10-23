@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 
 use Slic3r::Electronics::Geometrics;
+use Slic3r::Geometry qw(X Y Z deg2rad);
 
 sub new {
     my $class = shift;
@@ -41,8 +42,8 @@ sub setPosition {
 
 sub setRotation {
     my $self = shift;
-    my ($r,$p,$y) = @_;
-    $self->{rotation} = [$r,$p,$y];
+    my ($x,$y,$z) = @_;
+    $self->{rotation} = [$x,$y,$z];
 }
 
 sub addPad {
@@ -64,7 +65,6 @@ sub getModel {
         }
     }
     my $model = $self->getTriangleMesh(@triangles);
-    $model->translate(@{$self->{position}});
     return $model;
 }
 
@@ -84,6 +84,11 @@ sub getTriangleMesh {
     my $mesh = Slic3r::TriangleMesh->new;
     $mesh->ReadFromPerl($self->{vertices}, $self->{facets});
     $mesh->repair;
+    $mesh->rotate_x(deg2rad($self->{rotation}[0])) if ($self->{rotation}[0] != 0);
+    $mesh->rotate_y(deg2rad($self->{rotation}[1])) if ($self->{rotation}[1] != 0);
+    $mesh->rotate_z(deg2rad($self->{rotation}[2])) if ($self->{rotation}[2] != 0);
+    $mesh->translate(@{$self->{position}});
+    
     
     my $model = Slic3r::Model->new;
     

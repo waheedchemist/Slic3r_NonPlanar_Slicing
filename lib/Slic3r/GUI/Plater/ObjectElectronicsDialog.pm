@@ -128,14 +128,14 @@ sub new {
     my $z_field = $self->{z_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
     my $rotation_text = $self->{rotation_text} = Wx::StaticText->new($self, -1, "Rotation:",wxDefaultPosition,[100,-1]);
-    my $ro_text = $self->{ro_text} = Wx::StaticText->new($self, -1, "Roll:",wxDefaultPosition,[100,-1]);
-    my $ro_field = $self->{ro_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $xr_text = $self->{xr_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
+    my $xr_field = $self->{xr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
-    my $pi_text = $self->{pi_text} = Wx::StaticText->new($self, -1, "Pitch:",wxDefaultPosition,[100,-1]);
-    my $pi_field = $self->{pi_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $yr_text = $self->{yr_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
+    my $yr_field = $self->{yr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
-    my $ya_text = $self->{ya_text} = Wx::StaticText->new($self, -1, "Yaw:",wxDefaultPosition,[100,-1]);
-    my $ya_field = $self->{ya_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
+    my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
     my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[100,-1]);
     
@@ -174,12 +174,12 @@ sub new {
     $settings_sizer_positions->Add($self->{rotation_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{ro_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{pi_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{ya_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{ro_field}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{pi_field}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{ya_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xr_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yr_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zr_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xr_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yr_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zr_field}, 1,wxTOP, 0);
     
     my $btn_save_part = $self->{btn_save_part} = Wx::Button->new($self, -1, "Save Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     $settings_sizer_buttons->Add($btn_save_part, 0);
@@ -388,10 +388,10 @@ sub displayPart {
         }
         if ($part->{volume}) {
             my ($x, $y, $z) = @{$part->{position}};
-            my ($ro, $pi, $ya) = @{$part->{rotation}};
+            my ($xr, $yr, $zr) = @{$part->{rotation}};
             $self->removePart($part);
             @{$part->{position}} = ($x, $y, $z);
-            @{$part->{rotation}} = ($ro, $pi, $ya);
+            @{$part->{rotation}} = ($xr, $yr, $zr);
         }
         my $model = $part->getModel;
             
@@ -574,9 +574,9 @@ sub showPartInfo {
     $self->{x_field}->SetValue($part->{position}[0]) if (defined($part->{position}[0]));
     $self->{y_field}->SetValue($part->{position}[1]) if (defined($part->{position}[1]));
     $self->{z_field}->SetValue($part->{position}[2]) if (defined($part->{position}[2]));
-    $self->{ro_field}->SetValue($part->{rotation}[0]) if (defined($part->{rotation}[0]));
-    $self->{pi_field}->SetValue($part->{rotation}[1]) if (defined($part->{rotation}[1]));
-    $self->{ya_field}->SetValue($part->{rotation}[2]) if (defined($part->{rotation}[2]));
+    $self->{xr_field}->SetValue($part->{rotation}[0]) if (defined($part->{rotation}[0]));
+    $self->{yr_field}->SetValue($part->{rotation}[1]) if (defined($part->{rotation}[1]));
+    $self->{zr_field}->SetValue($part->{rotation}[2]) if (defined($part->{rotation}[2]));
 }
 
 sub clearPartInfo {
@@ -590,9 +590,9 @@ sub clearPartInfo {
     $self->{x_field}->SetValue("");
     $self->{y_field}->SetValue("");
     $self->{z_field}->SetValue("");
-    $self->{ro_field}->SetValue("");
-    $self->{pi_field}->SetValue("");
-    $self->{ya_field}->SetValue("");
+    $self->{xr_field}->SetValue("");
+    $self->{yr_field}->SetValue("");
+    $self->{zr_field}->SetValue("");
 }
 
 sub savePartInfo {
@@ -606,7 +606,7 @@ sub savePartInfo {
     $part->{package} = $self->{package_field}->GetValue;
     $part->{height} = $self->{height_field}->GetValue;
     @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue);
-    @{$part->{rotation}} = ($self->{ro_field}->GetValue, $self->{pi_field}->GetValue, $self->{ya_field}->GetValue);
+    @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue);
     $self->displayPart($part);
         
 }
