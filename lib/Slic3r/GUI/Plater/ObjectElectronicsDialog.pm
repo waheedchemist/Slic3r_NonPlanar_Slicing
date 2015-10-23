@@ -89,11 +89,14 @@ sub new {
     
     # mid buttons
     my $btn_place_part = $self->{btn_place_part} = Wx::Button->new($self, -1, "Place part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
+    my $btn_remove_part = $self->{btn_remove_part} = Wx::Button->new($self, -1, "Remove Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # mid buttons sizer
     my $buttons_sizer_mid = Wx::BoxSizer->new(wxHORIZONTAL | wxEXPAND);
     $buttons_sizer_mid->Add($btn_place_part, 0);
+    $buttons_sizer_mid->Add($btn_remove_part, 0);
     $btn_place_part->SetFont($Slic3r::GUI::small_font);
+    $btn_remove_part->SetFont($Slic3r::GUI::small_font);
     
     # part settings fields
     my $name_text = $self->{name_text} = Wx::StaticText->new($self, -1, "Name:",wxDefaultPosition,[100,-1]);
@@ -268,16 +271,20 @@ sub new {
         $self->loadButtonPressed;
     });
     
-    EVT_BUTTON($self, $self->{btn_save_netlist}, sub { 
-        $self->saveButtonPressed;
-    });
-    
     EVT_BUTTON($self, $self->{btn_place_part}, sub { 
         $self->placeButtonPressed; 
     });
     
+    EVT_BUTTON($self, $self->{btn_remove_part}, sub { 
+        $self->removeButtonPressed; 
+    });
+    
     EVT_BUTTON($self, $self->{btn_save_part}, sub { 
         $self->savePartButtonPressed; 
+    });
+    
+    EVT_BUTTON($self, $self->{btn_save_netlist}, sub { 
+        $self->saveButtonPressed;
     });
     
     $self->reload_tree;
@@ -380,7 +387,11 @@ sub displayPart {
             $part->{height} = $self->get_layer_thickness($part->{position}[2]);
         }
         if ($part->{volume}) {
+            my ($x, $y, $z) = @{$part->{position}};
+            my ($ro, $pi, $ya) = @{$part->{rotation}};
             $self->removePart($part);
+            @{$part->{position}} = ($x, $y, $z);
+            @{$part->{rotation}} = ($ro, $pi, $ya);
         }
         my $model = $part->getModel;
             
@@ -587,6 +598,7 @@ sub clearPartInfo {
 sub savePartInfo {
     my $self = shift;
     my ($part) = @_;
+    $self->removePart($part);
     $part->{name} = $self->{name_field}->GetValue;
     $part->{library} = $self->{library_field}->GetValue;
     $part->{deviceset} = $self->{deviceset_field}->GetValue;
@@ -632,6 +644,15 @@ sub loadButtonPressed {
 sub placeButtonPressed {
     my $self = shift;
     $self->{place} = $self->get_selection;
+}
+
+sub removeButtonPressed {
+    my $self = shift;
+    my $selection = $self->get_selection;
+    if ($selection->{type} eq 'volume') {
+        my $part = $self->findPartByVolume($selection->{volume});
+        $self->removePart($part) if defined($part);
+    }
 }
 
 sub get_place {

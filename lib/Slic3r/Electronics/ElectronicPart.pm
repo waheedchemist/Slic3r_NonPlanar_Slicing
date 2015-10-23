@@ -28,7 +28,9 @@ sub new {
 
 sub removePart {
     my $self = shift;
-    $self->{volume} = undef;    
+    $self->{volume} = undef; 
+    @{$self->{position}} = (undef,undef,undef);
+    @{$self->{rotation}} = (0,0,0);
 }
 
 sub setPosition {

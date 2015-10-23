@@ -21,8 +21,8 @@ sub new {
 
 sub mouse_event_new {
     my ($self, $e) = @_;
-    my $cur_pos = $self->mouse_ray($e->GetX, $e->GetY)->intersect_plane($self->{parent}->get_z);
-    if ($self->{parent}->get_place && $e->LeftUp) {
+    if ($e->LeftUp && $self->{parent}->get_place) {
+        my $cur_pos = $self->mouse_ray($e->GetX, $e->GetY)->intersect_plane($self->{parent}->get_z);
         my $item = $self->{parent}->get_place;
         if ($item->{type} eq 'part') {
             $self->{parent}->placePart($item->{part}, @$cur_pos);
