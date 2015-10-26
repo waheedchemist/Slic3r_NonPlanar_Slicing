@@ -30,6 +30,7 @@ sub readFile {
         my $height = undef;
         my @position = undef;
         my @rotation = undef;
+        my @chipsize = undef;
         for my $h ($node->findnodes('./attributes')) {
             $height = $h->getAttribute('height');
         }
@@ -38,6 +39,9 @@ sub readFile {
         }
         for my $rot ($node->findnodes('./rotation')) {
             @rotation = ($rot->getAttribute('X'),$rot->getAttribute('Y'),$rot->getAttribute('Z'));
+        }
+        for my $chip ($node->findnodes('./chipsize')) {
+            @chipsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
         }
         for my $part (@partlist) {
             if (($part->{name} eq $name) && 
@@ -48,6 +52,7 @@ sub readFile {
                 $part->{height} = $height;
                 @{$part->{position}} = @position;
                 @{$part->{rotation}} = @rotation;
+                @{$part->{chipsize}} = @chipsize;
             }
         }
     }
@@ -94,6 +99,12 @@ sub writeFile {
             $rot->addChild($dom->createAttribute( X => $part->{rotation}[0]));
             $rot->addChild($dom->createAttribute( Y => $part->{rotation}[1]));
             $rot->addChild($dom->createAttribute( Z => $part->{rotation}[2]));
+            
+            my $chip = $dom->createElement('chipsize');
+            $node->addChild($chip);
+            $chip->addChild($dom->createAttribute( X => $part->{chipsize}[0]));
+            $chip->addChild($dom->createAttribute( Y => $part->{chipsize}[1]));
+            $chip->addChild($dom->createAttribute( Z => $part->{chipsize}[2]));
         }
     }
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));

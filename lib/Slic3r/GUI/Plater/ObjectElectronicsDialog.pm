@@ -137,12 +137,22 @@ sub new {
     my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
     my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
+    my $chipsize_text = $self->{chipsize_text} = Wx::StaticText->new($self, -1, "Chipsize:",wxDefaultPosition,[100,-1]);
+    my $xs_text = $self->{xs_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
+    my $xs_field = $self->{xs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
+    my $ys_text = $self->{ys_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
+    my $ys_field = $self->{ys_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
+    my $zs_text = $self->{zs_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
+    my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
     my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[100,-1]);
     
     # settings sizer
     my $settings_sizer_main = Wx::StaticBoxSizer->new($self->{staticbox} = Wx::StaticBox->new($self, -1, "Part Settings"),wxVERTICAL);
     my $settings_sizer_sttings = Wx::FlexGridSizer->new( 6, 2, 5, 5);
-    my $settings_sizer_positions = Wx::FlexGridSizer->new( 6, 3, 5, 5);
+    my $settings_sizer_positions = Wx::FlexGridSizer->new( 9, 3, 5, 5);
     my $settings_sizer_buttons = Wx::FlexGridSizer->new( 1, 1, 5, 5);
     
     $settings_sizer_main->Add($settings_sizer_sttings, 0,wxTOP, 0);
@@ -180,6 +190,15 @@ sub new {
     $settings_sizer_positions->Add($self->{xr_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{yr_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zr_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{chipsize_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xs_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{ys_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zs_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xs_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{ys_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zs_field}, 1,wxTOP, 0);
     
     my $btn_save_part = $self->{btn_save_part} = Wx::Button->new($self, -1, "Save Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     $settings_sizer_buttons->Add($btn_save_part, 0);
@@ -393,13 +412,13 @@ sub displayPart {
             @{$part->{position}} = ($x, $y, $z);
             @{$part->{rotation}} = ($xr, $yr, $zr);
         }
-        my $model = $part->getModel;
+        my $footprint_model = $part->getFootprintModel;
             
-        foreach my $object (@{$model->objects}) {
+        foreach my $object (@{$footprint_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
                 my $new_volume = $self->{model_object}->add_volume($volume);
                 $new_volume->set_modifier(1);
-                $new_volume->set_name($part->{name});
+                $new_volume->set_name($part->{name}."-Footprint");
                 $new_volume->set_material_id(0);
                 
                 # apply the same translation we applied to the object
@@ -413,6 +432,27 @@ sub displayPart {
                 $self->{parts_changed} = 1;
             }
         }
+        
+        my $chip_model = $part->getChipModel;
+            
+        foreach my $object (@{$chip_model->objects}) {
+            foreach my $volume (@{$object->volumes}) {
+                my $new_volume = $self->{model_object}->add_volume($volume);
+                $new_volume->set_modifier(1);
+                $new_volume->set_name($part->{name}."-Part");
+                $new_volume->set_material_id(0);
+                
+                # apply the same translation we applied to the object
+                #$new_volume->mesh->translate(@{$self->{model_object}->origin_translation});
+                
+                # set a default extruder value, since user can't add it manually
+                $new_volume->config->set_ifndef('extruder', 0);
+                
+                $part->{chipVolume} = $new_volume;
+                
+                $self->{parts_changed} = 1;
+            }
+        }
     }
 }
 
@@ -421,17 +461,22 @@ sub removePart {
     my ($reference) = @_;
     my $part;
     my $volumeId;
+    
     if (blessed($reference) eq "Slic3r::Electronics::ElectronicPart") {
         $volumeId = $self->findVolumeId($reference->{volume});
         $part = $reference;
     } else {
         $volumeId = $reference;
-        my $part = $self->findPartByVolume($self->{model_object}->volumes->[$reference]);  
+        $part = $self->findPartByVolume($self->{model_object}->volumes->[$reference]);
     }
-    $part->removePart;
     if (defined($volumeId)){
         $self->{model_object}->delete_volume($volumeId);
     }
+    my $chipVolumeId = $self->findVolumeId($part->{chipVolume});
+    if (defined($chipVolumeId)){
+        $self->{model_object}->delete_volume($chipVolumeId);
+    }
+    $part->removePart;
     $self->reload_tree;
 }
 
@@ -577,6 +622,9 @@ sub showPartInfo {
     $self->{xr_field}->SetValue($part->{rotation}[0]) if (defined($part->{rotation}[0]));
     $self->{yr_field}->SetValue($part->{rotation}[1]) if (defined($part->{rotation}[1]));
     $self->{zr_field}->SetValue($part->{rotation}[2]) if (defined($part->{rotation}[2]));
+    $self->{xs_field}->SetValue($part->{chipsize}[0]) if (defined($part->{chipsize}[0]));
+    $self->{ys_field}->SetValue($part->{chipsize}[1]) if (defined($part->{chipsize}[1]));
+    $self->{zs_field}->SetValue($part->{chipsize}[2]) if (defined($part->{chipsize}[2]));
 }
 
 sub clearPartInfo {
@@ -593,12 +641,14 @@ sub clearPartInfo {
     $self->{xr_field}->SetValue("");
     $self->{yr_field}->SetValue("");
     $self->{zr_field}->SetValue("");
+    $self->{xs_field}->SetValue("");
+    $self->{ys_field}->SetValue("");
+    $self->{zs_field}->SetValue("");
 }
 
 sub savePartInfo {
     my $self = shift;
     my ($part) = @_;
-    $self->removePart($part);
     $part->{name} = $self->{name_field}->GetValue;
     $part->{library} = $self->{library_field}->GetValue;
     $part->{deviceset} = $self->{deviceset_field}->GetValue;
@@ -607,6 +657,7 @@ sub savePartInfo {
     $part->{height} = $self->{height_field}->GetValue;
     @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue);
     @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue);
+    @{$part->{chipsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue);
     $self->displayPart($part);
         
 }
@@ -699,9 +750,9 @@ sub findPartByVolume {
     my $self = shift;
     my ($volume) = @_;
     for my $part (@{$self->{schematic}}) {
-        if (Dumper($part->{volume}) eq Dumper($volume)) {
+        if (Dumper($part->{volume}) eq Dumper($volume) || Dumper($part->{chipVolume}) eq Dumper($volume)) {
             return $part;  
-        }            
+        } 
     }
     return;
 }

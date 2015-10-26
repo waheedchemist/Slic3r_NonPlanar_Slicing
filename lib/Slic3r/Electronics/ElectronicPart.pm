@@ -5,6 +5,7 @@ use utf8;
 
 use Slic3r::Electronics::Geometrics;
 use Slic3r::Geometry qw(X Y Z deg2rad);
+use List::Util qw[min max];
 
 sub new {
     my $class = shift;
@@ -17,19 +18,23 @@ sub new {
     $self->{device} = $device;
     $self->{package} = $package;
     $self->{height} = undef;
-    my $volume = $self->{volume} = ();
+    $self->{volume} = undef;
+    $self->{chipVolume} = undef;
     
     my @position = @{$self->{position}} = (undef,undef,undef);
     my @rotation = @{$self->{rotation}} = (0,0,0);
     
     my @padlist = @{$self->{padlist}} = ();
     
+    my @chipsize = @{$self->{chipsize}} = (undef,undef,undef);
+
     return $self;
 }
 
 sub removePart {
     my $self = shift;
     $self->{volume} = undef; 
+    $self->{chipVolume} = undef; 
     @{$self->{position}} = (undef,undef,undef);
     @{$self->{rotation}} = (0,0,0);
 }
@@ -46,13 +51,51 @@ sub setRotation {
     $self->{rotation} = [$x,$y,$z];
 }
 
+sub setChipsize {
+    my $self = shift;
+    my ($x,$y,$z) = @_;
+    $self->{chipsize} = [$x,$y,$z];
+}
+
+sub getChipsize {
+    my $self = shift;
+    if (!(defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]))) {
+        my $xmin = 0;
+        my $ymin = 0;
+        my $xmax = 0;
+        my $ymax = 0;
+        for my $pad (@{$self->{padlist}}) {
+            if ($pad->{type} eq 'smd') {
+                $xmin = min($xmin, $pad->{position}[0]-$pad->{size}[0]/2);
+                $xmax = max($xmax, $pad->{position}[0]+$pad->{size}[0]/2);
+                $ymin = min($ymin, $pad->{position}[1]-$pad->{size}[1]/2);
+                $ymax = max($ymax, $pad->{position}[1]+$pad->{size}[1]/2);
+            }
+            if ($pad->{type} eq 'pad') {
+                $xmin = min($xmin, $pad->{position}[0]-($pad->{drill}/2+0.25));
+                $xmax = max($xmax, $pad->{position}[0]+($pad->{drill}/2+0.25));
+                $ymin = min($ymin, $pad->{position}[1]-($pad->{drill}/2+0.25));
+                $ymax = max($ymax, $pad->{position}[1]+($pad->{drill}/2+0.25));
+            }
+        }
+        @{$self->{chipsize}} = ($xmax-$xmin,$ymax-$ymin,$self->getChipheight);
+    }
+    
+    return @{$self->{chipsize}};
+}
+
+sub getChipheight {
+    my $self = shift;
+    return 1;
+}
+
 sub addPad {
     my $self = shift;
     my $pad = Slic3r::Electronics::ElectronicPad->new(@_);
     push @{$self->{padlist}}, $pad;
 }
 
-sub getModel {
+sub getFootprintModel {
     my $self = shift;
     my @triangles = ();
     for my $pad (@{$self->{padlist}}) {
@@ -61,9 +104,17 @@ sub getModel {
         }
         if ($pad->{type} eq 'pad') {
             #TODO round hole pads
-            push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$pad->{position}}, @{$pad->{size}});
+            push @triangles, Slic3r::Electronics::Geometrics->getCylinder(@{$pad->{position}}, $pad->{drill}/2+0.25, $self->{height}*(-1));
         }
     }
+    my $model = $self->getTriangleMesh(@triangles);
+    return $model;
+}
+
+sub getChipModel {
+    my $self = shift;
+    my @triangles = ();
+    push @triangles, Slic3r::Electronics::Geometrics->getCube((0,0,0), $self->getChipsize);
     my $model = $self->getTriangleMesh(@triangles);
     return $model;
 }
