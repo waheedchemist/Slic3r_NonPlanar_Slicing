@@ -968,7 +968,6 @@ sub load_object {
     my ($self, $model, $obj_idx, $instance_idxs, $v_idxs) = @_;
     
     my $model_object;
-
     if ($model->isa('Slic3r::Model::Object')) {
         $model_object = $model;
         $model = $model_object->model;
