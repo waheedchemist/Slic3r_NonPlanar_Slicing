@@ -1,4 +1,4 @@
-This is a modification of the Slic3r to itegrate elextronic parts into 3D printable objects.
+This is a modification of the Slic3r to itegrate electronic parts into 3D printable objects.
 
 
 Slic3r [![Build Status](https://travis-ci.org/alexrj/Slic3r.png?branch=master)](https://travis-ci.org/alexrj/Slic3r)
