@@ -734,9 +734,9 @@ sub savePartInfo {
     $part->{device} = $self->{device_field}->GetValue;
     $part->{package} = $self->{package_field}->GetValue;
     $part->{height} = $self->{height_field}->GetValue;
-    @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue);
-    @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue);
-    @{$part->{chipsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue);
+    @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue) if (!($self->{x_field}->GetValue eq "") && !($self->{y_field}->GetValue eq "") && !($self->{z_field}->GetValue eq ""));
+    @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue) if (!($self->{xr_field}->GetValue eq "") && !($self->{yr_field}->GetValue eq "") && !($self->{zr_field}->GetValue eq ""));
+    @{$part->{chipsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue) if (!($self->{xs_field}->GetValue eq "") && !($self->{ys_field}->GetValue eq "") && !($self->{zs_field}->GetValue eq ""));
     $self->displayPart($part);
         
 }
