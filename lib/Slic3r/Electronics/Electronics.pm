@@ -9,6 +9,12 @@ use File::Basename;
 use Slic3r::Electronics::Filereaders::Eagle;
 use Slic3r::Electronics::Filereaders::3DElectronics;
 
+#######################################################################
+# Purpose    : Reads a given file
+# Parameters : A filename
+# Returns    : Schematic of Electronics
+# Commet     : Delegates the reading of the file to the Filereaders
+#######################################################################
 sub readFile {
     my $self = shift;
     my ($filename) = @_;
@@ -26,10 +32,15 @@ sub readFile {
     return ;
 }
 
+#######################################################################
+# Purpose    : Writes a file
+# Parameters : see Slic3r::Electronics::Filereaders::3DElectronics->writeFile
+# Returns    : see Slic3r::Electronics::Filereaders::3DElectronics->writeFile
+# Commet     :
+#######################################################################
 sub writeFile {
     my $self = shift;
-    my ($filename, @schematic) = @_;
-    return Slic3r::Electronics::Filereaders::3DElectronics->writeFile($filename, @schematic);
+    return Slic3r::Electronics::Filereaders::3DElectronics->writeFile(@_);
 }
 
 1;

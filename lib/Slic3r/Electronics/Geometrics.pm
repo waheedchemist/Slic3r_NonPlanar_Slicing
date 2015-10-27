@@ -5,6 +5,12 @@ use utf8;
 
 use Slic3r::Geometry qw(deg2rad);
 
+#######################################################################
+# Purpose    : Creates a cube out of triangles
+# Parameters : x, y, z position and dx, dy, dz dimensions
+# Returns    : A cube
+# Commet     :
+#######################################################################
 sub getCube {
     my $self = shift;
     my ($x,$y,$z,$dx,$dy,$dz) = @_;
@@ -27,6 +33,12 @@ sub getCube {
     
 }
 
+#######################################################################
+# Purpose    : Creates a cylinder out of triangles
+# Parameters : x, y, z position, radius and height
+# Returns    : A Cylinder
+# Commet     :
+#######################################################################
 sub getCylinder {
     my $self = shift;
     my ($x,$y,$z,$r,$h) = @_;

@@ -8,6 +8,12 @@ use base qw(Slic3r::GUI::3DScene);
 
 use Data::Dumper;
 
+#######################################################################
+# Purpose    : Creates a new 3D scene
+# Parameters : see Slic3r::GUI::3DScene
+# Returns    : see Slic3r::GUI::3DScene
+# Commet     :
+#######################################################################
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new($parent);
@@ -19,6 +25,12 @@ sub new {
     return $self;
 }
 
+#######################################################################
+# Purpose    : Processes mouse events
+# Parameters : An mouse event
+# Returns    : none
+# Commet     : Overloads the method mouse_event_new of Slic3r::GUI::3DScene
+#######################################################################
 sub mouse_event_new {
     my ($self, $e) = @_;
     if ($e->LeftUp && $self->{parent}->get_place) {

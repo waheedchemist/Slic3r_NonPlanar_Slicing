@@ -1540,7 +1540,12 @@ sub object_settings_dialog {
     }
 }
 
-# opens the 3D electronics window
+#######################################################################
+# Purpose    : Opens the 3D electronics window
+# Parameters : object to integrate electronics
+# Returns    : undef of config is not valid
+# Commet     : 
+#######################################################################
 sub object_electronics_dialog {
     my $self = shift;
     my ($obj_idx) = @_;
@@ -1565,21 +1570,7 @@ sub object_electronics_dialog {
     $self->pause_background_process;
     $dlg->Show;
     
-    # update thumbnail since parts may have changed
-    #if ($dlg->PartsChanged) {
-    #    # recenter and re-align to Z = 0
-    #    $model_object->center_around_origin;
-    #    $self->make_thumbnail($obj_idx);
-    #}
-    
-    # update print
-    #if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
-    #    $self->stop_background_process;
-    #    $self->{print}->reload_object($obj_idx);
-    #    $self->schedule_background_process;
-    #} else {
-        $self->resume_background_process;
-    #}
+    $self->resume_background_process;
 }
 
 sub object_list_changed {

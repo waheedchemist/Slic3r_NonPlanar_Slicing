@@ -7,6 +7,12 @@ use Slic3r::Electronics::Geometrics;
 use Slic3r::Geometry qw(X Y Z deg2rad);
 use List::Util qw[min max];
 
+#######################################################################
+# Purpose    : Generates new Part
+# Parameters : Name, library, deviceset, device and package of new part
+# Returns    : Reference to new Part
+# Commet     :
+#######################################################################
 sub new {
     my $class = shift;
     my $self = {};
@@ -31,6 +37,12 @@ sub new {
     return $self;
 }
 
+#######################################################################
+# Purpose    : Removes the position of the part
+# Parameters : none
+# Returns    : none
+# Commet     : Doesnt removes the part itself
+#######################################################################
 sub removePart {
     my $self = shift;
     $self->{volume} = undef; 
@@ -39,24 +51,49 @@ sub removePart {
     @{$self->{rotation}} = (0,0,0);
 }
 
+#######################################################################
+# Purpose    : Sets the position of the part
+# Parameters : x, y, z coordinates of the part
+# Returns    : none
+# Commet     : coordinates have to be valid
+#######################################################################
 sub setPosition {
     my $self = shift;
     my ($x,$y,$z) = @_;
     $self->{position} = [$x,$y,$z];
 }
 
+#######################################################################
+# Purpose    : Sets the rotation angles of the part
+# Parameters : x, y, z rotation angles
+# Returns    : none
+# Commet     : rotation angles have to be in degree and valid
+#######################################################################
 sub setRotation {
     my $self = shift;
     my ($x,$y,$z) = @_;
     $self->{rotation} = [$x,$y,$z];
 }
 
+#######################################################################
+# Purpose    : Sets the chipsize of the part itself
+# Parameters : x, y, z dimensions of the part
+# Returns    : none
+# Commet     : values have to be valid
+#######################################################################
 sub setChipsize {
     my $self = shift;
     my ($x,$y,$z) = @_;
     $self->{chipsize} = [$x,$y,$z];
 }
 
+#######################################################################
+# Purpose    : returns the chipsize of the part
+# Parameters : none
+# Returns    : (x, y, z) dimensions of the part
+# Commet     : when the dimensions are not set,
+#            : they are calculated by the footprint
+#######################################################################
 sub getChipsize {
     my $self = shift;
     if (!(defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]))) {
@@ -84,17 +121,35 @@ sub getChipsize {
     return @{$self->{chipsize}};
 }
 
+#######################################################################
+# Purpose    : returns the height of the chip
+# Parameters : none
+# Returns    : height of chip
+# Commet     : 
+#######################################################################
 sub getChipheight {
     my $self = shift;
     return 1;
 }
 
+#######################################################################
+# Purpose    : adds a pad to the footprint of the part
+# Parameters : see Slic3r::Electronics::ElectronicPad->new
+# Returns    : none
+# Commet     :
+#######################################################################
 sub addPad {
     my $self = shift;
     my $pad = Slic3r::Electronics::ElectronicPad->new(@_);
     push @{$self->{padlist}}, $pad;
 }
 
+#######################################################################
+# Purpose    : Gives a model of the parts footprint
+# Parameters : none
+# Returns    : Footprint model
+# Commet     : The model is translated and rotated
+#######################################################################
 sub getFootprintModel {
     my $self = shift;
     my @triangles = ();
@@ -103,7 +158,6 @@ sub getFootprintModel {
             push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$pad->{position}}, ($pad->{size}[0], $pad->{size}[1], $self->{height}*(-1)));
         }
         if ($pad->{type} eq 'pad') {
-            #TODO round hole pads
             push @triangles, Slic3r::Electronics::Geometrics->getCylinder(@{$pad->{position}}, $pad->{drill}/2+0.25, $self->{height}*(-1));
         }
     }
@@ -111,6 +165,12 @@ sub getFootprintModel {
     return $model;
 }
 
+#######################################################################
+# Purpose    : Gives a model of the parts chip
+# Parameters : none
+# Returns    : Chip model
+# Commet     : The model is translated and rotated
+#######################################################################
 sub getChipModel {
     my $self = shift;
     my @triangles = ();
@@ -119,6 +179,12 @@ sub getChipModel {
     return $model;
 }
 
+#######################################################################
+# Purpose    : Converts triagles to a triaglesMesh
+# Parameters : Triagles to convert
+# Returns    : a Model
+# Commet     : Translates and rotates the model
+#######################################################################
 sub getTriangleMesh {
     my $self = shift;
     my (@triangles) = @_;
@@ -149,6 +215,12 @@ sub getTriangleMesh {
     return $model;
 }
 
+#######################################################################
+# Purpose    : Gives a vertex id for a given vertex
+# Parameters : The vertex
+# Returns    : An id
+# Commet     : If the vertex doesnt exists it will be created
+#######################################################################
 sub getVertexID {
     my $self = shift;
     my @vertex = @_;
@@ -168,6 +240,12 @@ use strict;
 use warnings;
 use utf8;
 
+#######################################################################
+# Purpose    : Creates a new pad
+# Parameters : type, name, x, y, r, dx, dy, drill, shape of the pad
+# Returns    : A new Pad
+# Commet     : 
+#######################################################################
 sub new {
     my $class = shift;
     my $self = {};

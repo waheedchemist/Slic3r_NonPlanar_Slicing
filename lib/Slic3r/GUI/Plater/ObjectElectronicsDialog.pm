@@ -7,6 +7,12 @@ use Wx qw(:dialog :id :misc :sizer :systemsettings :notebook wxTAB_TRAVERSAL);
 use Wx::Event qw(EVT_BUTTON);
 use base 'Wx::Frame';
 
+#######################################################################
+# Purpose    : Creates a new Frame for 3DElectronics
+# Parameters : name, object model, schematic and source filename
+# Returns    : A new Frame
+# Commet     :
+#######################################################################
 sub new {
     my $class = shift;
     my ($parent, $print, %params) = @_;
@@ -50,6 +56,12 @@ use constant ICON_SOLIDMESH     => 1;
 use constant ICON_MODIFIERMESH  => 2;
 use constant ICON_PCB           => 3;
 
+#######################################################################
+# Purpose    : Creates a Panel for 3DElectronics
+# Parameters : model_object, schematic and source filename to edit
+# Returns    : A Panel
+# Commet     : Main Panel for 3D Electronics
+#######################################################################
 sub new {
     my $class = shift;
     my ($parent, $print, %params) = @_;
@@ -114,7 +126,7 @@ sub new {
     my $package_text = $self->{package_text} = Wx::StaticText->new($self, -1, "Package:",wxDefaultPosition,[100,-1]);
     my $package_field = $self->{package_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
     
-    my $height_text = $self->{height_text} = Wx::StaticText->new($self, -1, "Height:",wxDefaultPosition,[100,-1]);
+    my $height_text = $self->{height_text} = Wx::StaticText->new($self, -1, "Layer height:",wxDefaultPosition,[100,-1]);
     my $height_field = $self->{height_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
     
     my $position_text = $self->{position_text} = Wx::StaticText->new($self, -1, "Position:",wxDefaultPosition,[100,-1]);
@@ -137,7 +149,7 @@ sub new {
     my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
     my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
-    my $chipsize_text = $self->{chipsize_text} = Wx::StaticText->new($self, -1, "Chipsize:",wxDefaultPosition,[100,-1]);
+    my $partsize_text = $self->{partsize_text} = Wx::StaticText->new($self, -1, "Partsize:",wxDefaultPosition,[100,-1]);
     my $xs_text = $self->{xs_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
     my $xs_field = $self->{xs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
@@ -190,7 +202,7 @@ sub new {
     $settings_sizer_positions->Add($self->{xr_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{yr_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zr_field}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{chipsize_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{partsize_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xs_text}, 1,wxTOP, 0);
@@ -311,16 +323,25 @@ sub new {
     return $self;
 }
 
-#reloads the print if something has changed
+#######################################################################
+# Purpose    : Reloads the print on the canvas
+# Parameters : none
+# Returns    : none
+# Commet     :
+#######################################################################
 sub reload_print {
     my ($self) = @_;
-    
     $self->canvas->reset_objects;
     $self->_loaded(0);
     $self->load_print;
 }
 
-# load the print
+#######################################################################
+# Purpose    : loads the print and the objects on the canvas
+# Parameters : none
+# Returns    : undef if not loaded
+# Commet     : First loads Print, second footprints and third pars
+#######################################################################
 sub load_print {
     my ($self) = @_;
     return if $self->_loaded;
@@ -387,6 +408,12 @@ sub load_print {
     }
 }
 
+#######################################################################
+# Purpose    : Places a part to a position on canvas
+# Parameters : part and x,y,z positions
+# Returns    : none
+# Commet     : For mouse placement, also calculates the offset
+#######################################################################
 sub placePart {
     my $self = shift;
     my ($part, $x, $y, $z) = @_;
@@ -396,6 +423,12 @@ sub placePart {
     $self->reload_tree;
 }
 
+#######################################################################
+# Purpose    : Displays a Part and its footprint on the canvas
+# Parameters : part to display
+# Returns    : none
+# Commet     : When the part already exists on canvas it will be deleted
+#######################################################################
 sub displayPart {
     my $self = shift;
     my ($part) = @_;
@@ -417,19 +450,14 @@ sub displayPart {
         foreach my $object (@{$footprint_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
                 my $new_volume = $self->{model_object}->add_volume($volume);
-                $new_volume->set_modifier(1);
+                $new_volume->set_modifier(0);
                 $new_volume->set_name($part->{name}."-Footprint");
                 $new_volume->set_material_id(0);
-                
-                # apply the same translation we applied to the object
-                #$new_volume->mesh->translate(@{$self->{model_object}->origin_translation});
                 
                 # set a default extruder value, since user can't add it manually
                 $new_volume->config->set_ifndef('extruder', 0);
                 
                 $part->{volume} = $new_volume;
-                
-                $self->{parts_changed} = 1;
             }
         }
         
@@ -438,24 +466,25 @@ sub displayPart {
         foreach my $object (@{$chip_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
                 my $new_volume = $self->{model_object}->add_volume($volume);
-                $new_volume->set_modifier(1);
+                $new_volume->set_modifier(0);
                 $new_volume->set_name($part->{name}."-Part");
                 $new_volume->set_material_id(0);
-                
-                # apply the same translation we applied to the object
-                #$new_volume->mesh->translate(@{$self->{model_object}->origin_translation});
                 
                 # set a default extruder value, since user can't add it manually
                 $new_volume->config->set_ifndef('extruder', 0);
                 
                 $part->{chipVolume} = $new_volume;
-                
-                $self->{parts_changed} = 1;
             }
         }
     }
 }
 
+#######################################################################
+# Purpose    : Removes a part and its footprint form canvas
+# Parameters : part or volume_id
+# Returns    : none
+# Commet     : 
+#######################################################################
 sub removePart {
     my $self = shift;
     my ($reference) = @_;
@@ -481,6 +510,12 @@ sub removePart {
 }
 
 # reloads the model tree
+#######################################################################
+# Purpose    : Reloads the model tree
+# Parameters : currently selected volume
+# Returns    : none
+# Commet     : 
+#######################################################################
 sub reload_tree {
     my ($self, $selected_volume_idx) = @_;
     
@@ -546,7 +581,12 @@ sub reload_tree {
     });
 }
 
-# get the selected note from tree
+#######################################################################
+# Purpose    : Gets the selected volume form the model tree
+# Parameters : none
+# Returns    : volumeid or undef
+# Commet     :
+#######################################################################
 sub get_selection {
     my ($self) = @_;
     
@@ -557,8 +597,12 @@ sub get_selection {
     return undef;
 }
 
-# tree selection changed event
-# currently unused
+#######################################################################
+# Purpose    : Changes the GUI when the seletion in the model tree changes
+# Parameters : none
+# Returns    : none
+# Commet     :
+#######################################################################
 sub selection_changed {
     my ($self) = @_;
     my $selection = $self->get_selection;
@@ -578,12 +622,23 @@ sub selection_changed {
     }
 }
 
+#######################################################################
+# Purpose    : Gets the current z position of the canvas
+# Parameters : none
+# Returns    : z position
+# Commet     :
+#######################################################################
 sub get_z {
     my ($self) = @_;
     return $self->{layers_z}[$self->{slider}->GetValue];
 }
 
-# set the z axis to the choosen slice
+#######################################################################
+# Purpose    : Sets the z position on the canvas
+# Parameters : z position
+# Returns    : undef if canvas is not active
+# Commet     :
+#######################################################################
 sub set_z {
     my ($self, $z) = @_;
     
@@ -592,6 +647,12 @@ sub set_z {
     $self->canvas->set_toolpaths_range(0, $z);
 }
 
+#######################################################################
+# Purpose    : Gets the thickness of the current layer
+# Parameters : z position
+# Returns    : layer thickness
+# Commet     :
+#######################################################################
 sub get_layer_thickness {
     my $self = shift;
     my ($z) = @_;
@@ -606,6 +667,12 @@ sub get_layer_thickness {
     }
 }
 
+#######################################################################
+# Purpose    : Shows the part info in the GUI
+# Parameters : part to display
+# Returns    : none
+# Commet     :
+#######################################################################
 sub showPartInfo {
     my $self = shift;
     my ($part) = @_;
@@ -627,6 +694,12 @@ sub showPartInfo {
     $self->{zs_field}->SetValue($part->{chipsize}[2]) if (defined($part->{chipsize}[2]));
 }
 
+#######################################################################
+# Purpose    : Clears the part info
+# Parameters : none
+# Returns    : none
+# Commet     :
+#######################################################################
 sub clearPartInfo {
     my $self = shift;
     $self->{name_field}->SetValue("");
@@ -646,6 +719,12 @@ sub clearPartInfo {
     $self->{zs_field}->SetValue("");
 }
 
+#######################################################################
+# Purpose    : Saves the partinfo of the displayed part
+# Parameters : part to save
+# Returns    : none
+# Commet     :
+#######################################################################
 sub savePartInfo {
     my $self = shift;
     my ($part) = @_;
@@ -663,12 +742,17 @@ sub savePartInfo {
 }
 
 # Load button event
+#######################################################################
+# Purpose    : Event for load button
+# Parameters : $file to load
+# Returns    : none
+# Commet     : calls the method to read the file
+#######################################################################
 sub loadButtonPressed {
     my $self = shift;
     my ($file) = @_;
     
     if (!$file) {
-        #my $dir = $last_config ? dirname($last_config) : $Slic3r::GUI::Settings->{recent}{config_directory} || $Slic3r::GUI::Settings->{recent}{skein_directory} || '';
         my $dlg = Wx::FileDialog->new(
             $self, 
             'Select schematic to load:',
@@ -691,12 +775,46 @@ sub loadButtonPressed {
     $self->reload_tree;
 }
 
-# Save button event
+#######################################################################
+# Purpose    : Event for place button
+# Parameters : none
+# Returns    : none
+# Commet     : sets the place variable to the current selection
+#######################################################################
 sub placeButtonPressed {
     my $self = shift;
     $self->{place} = $self->get_selection;
 }
 
+#######################################################################
+# Purpose    : Returns the current item to place
+# Parameters : none
+# Returns    : item to place
+# Commet     :
+#######################################################################
+sub get_place {
+    my $self = shift;
+    return $self->{place};
+}
+
+#######################################################################
+# Purpose    : Sets the item to place
+# Parameters : item to place
+# Returns    : none
+# Commet     :
+#######################################################################
+sub set_place {
+    my $self = shift;
+    my ($value) = @_;
+    $self->{place} = $value;
+}
+
+#######################################################################
+# Purpose    : Event for remove button
+# Parameters : none
+# Returns    : none
+# Commet     : calls the remove function
+#######################################################################
 sub removeButtonPressed {
     my $self = shift;
     my $selection = $self->get_selection;
@@ -706,18 +824,12 @@ sub removeButtonPressed {
     }
 }
 
-sub get_place {
-    my $self = shift;
-    return $self->{place};
-}
-
-sub set_place {
-    my $self = shift;
-    my ($value) = @_;
-    $self->{place} = $value;
-}
-
-# Save button event
+#######################################################################
+# Purpose    : Event for save part button
+# Parameters : none
+# Returns    : none
+# Commet     : saves the partinfo
+#######################################################################
 sub savePartButtonPressed {
     my $self = shift;
     my $selection = $self->get_selection;
@@ -735,7 +847,12 @@ sub savePartButtonPressed {
     $self->reload_tree;
 }
 
-# Save button event
+#######################################################################
+# Purpose    : Event for save button
+# Parameters : none
+# Returns    : none
+# Commet     : Calls Slic3r::Electronics::Electronics->writeFile
+#######################################################################
 sub saveButtonPressed {
     my $self = shift;
     my ($base,$path,$type) = fileparse($self->{filename},('.sch','.SCH','3de','.3DE'));
@@ -746,6 +863,12 @@ sub saveButtonPressed {
     }
 }
 
+#######################################################################
+# Purpose    : Returns the part to a given volume
+# Parameters : volume to find
+# Returns    : part or undef
+# Commet     : compares volumes with Data::Dumper
+#######################################################################
 sub findPartByVolume {
     my $self = shift;
     my ($volume) = @_;
@@ -757,6 +880,12 @@ sub findPartByVolume {
     return;
 }
 
+#######################################################################
+# Purpose    : Returns a volumeID to a given volume
+# Parameters : volume to find
+# Returns    : volumeid
+# Commet     : compares volumes with Data::Dumper
+#######################################################################
 sub findVolumeId {
     my $self = shift;
     my ($volume) = @_;

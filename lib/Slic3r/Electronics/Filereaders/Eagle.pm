@@ -6,6 +6,12 @@ use utf8;
 use XML::LibXML;
 use Slic3r::Electronics::ElectronicPart;
 
+#######################################################################
+# Purpose    : Reads file of the Eagle type
+# Parameters : Filename to read
+# Returns    : Schematic of electronics
+# Commet     : 
+#######################################################################
 sub readFile {
     my $self = shift;
     my ($filename) = @_;
@@ -87,10 +93,6 @@ sub readFile {
         }
     }
     return @partlist;
-}
-
-sub writeFile {
-    print "Writing eagle files is not implemented\n";
 }
 
 1;

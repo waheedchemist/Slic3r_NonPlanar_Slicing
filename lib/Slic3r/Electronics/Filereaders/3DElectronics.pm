@@ -7,6 +7,12 @@ use XML::LibXML;
 use File::Basename;
 use Slic3r::Electronics::ElectronicPart;
 
+#######################################################################
+# Purpose    : Reads file of the 3DElectronics type
+# Parameters : Filename to read
+# Returns    : Schematic of electronics
+# Commet     : Calls read file of source file
+#######################################################################
 sub readFile {
     my $self = shift;
     my ($filename) = @_;
@@ -40,7 +46,7 @@ sub readFile {
         for my $rot ($node->findnodes('./rotation')) {
             @rotation = ($rot->getAttribute('X'),$rot->getAttribute('Y'),$rot->getAttribute('Z'));
         }
-        for my $chip ($node->findnodes('./chipsize')) {
+        for my $chip ($node->findnodes('./partsize')) {
             @chipsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
         }
         for my $part (@partlist) {
@@ -60,6 +66,12 @@ sub readFile {
 
 }
 
+#######################################################################
+# Purpose    : Writes file of the 3DElectronics type
+# Parameters : Source filename and schematic
+# Returns    : boolean is save was  successful
+# Commet     : 
+#######################################################################
 sub writeFile {
     my $self = shift;
     my ($filename, @schematics) = @_;
@@ -100,7 +112,7 @@ sub writeFile {
             $rot->addChild($dom->createAttribute( Y => $part->{rotation}[1]));
             $rot->addChild($dom->createAttribute( Z => $part->{rotation}[2]));
             
-            my $chip = $dom->createElement('chipsize');
+            my $chip = $dom->createElement('partsize');
             $node->addChild($chip);
             $chip->addChild($dom->createAttribute( X => $part->{chipsize}[0]));
             $chip->addChild($dom->createAttribute( Y => $part->{chipsize}[1]));
