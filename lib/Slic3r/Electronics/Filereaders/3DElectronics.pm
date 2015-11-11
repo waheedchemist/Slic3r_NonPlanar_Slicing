@@ -15,17 +15,16 @@ use Slic3r::Electronics::ElectronicPart;
 #######################################################################
 sub readFile {
     my $self = shift;
-    my ($filename) = @_;
+    my ($filename, $config) = @_;
 
     my $parser = XML::LibXML->new();
     my $xmldoc = $parser->parse_file($filename);
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));
-    
-    my @partlist = ();
-    my $oldFilename;
+    my $schematic;
+    $schematic->{partlist} = ();
     for my $files ($xmldoc->findnodes('/electronics/filename')) {
-        $oldFilename = $files->getAttribute('source');
-        ($oldFilename, @partlist) = Slic3r::Electronics::Electronics->readFile($path . $oldFilename);
+        $schematic->{filename} = $files->getAttribute('source');
+        $schematic = Slic3r::Electronics::Electronics->readFile($path . $schematic->{filename});
     }
     for my $node ($xmldoc->findnodes('/electronics/parts/part')) {
         my $name = $node->getAttribute('name');
@@ -49,7 +48,7 @@ sub readFile {
         for my $chip ($node->findnodes('./partsize')) {
             @chipsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
         }
-        for my $part (@partlist) {
+        for my $part (@{$schematic->{partlist}}) {
             if (($part->{name} eq $name) && 
                     ($part->{library} eq $library) && 
                     ($part->{deviceset} eq $deviceset) && 
@@ -62,31 +61,31 @@ sub readFile {
             }
         }
     }
-    return ($oldFilename, @partlist);
+    return $schematic;
 
 }
 
 #######################################################################
 # Purpose    : Writes file of the 3DElectronics type
-# Parameters : Source filename and schematic
+# Parameters : Schematic of electronics
 # Returns    : boolean is save was  successful
 # Commet     : 
 #######################################################################
 sub writeFile {
     my $self = shift;
-    my ($filename, @schematics) = @_;
+    my ($schematic) = @_;
     my $dom = XML::LibXML::Document->createDocument('1.0','utf-8');
     my $root = $dom->createElement('electronics');
     $root->addChild($dom->createAttribute( version => '1.0'));
     $dom->setDocumentElement($root);
-    
+
     my $file = $dom->createElement('filename');
     $root->addChild($file);
-    $file->addChild($dom->createAttribute( source => basename($filename)));
+    $file->addChild($dom->createAttribute( source => basename($schematic->{filename})));
     
     my $parts = $dom->createElement('parts');
     $root->addChild($parts);
-    for my $part (@schematics) {
+    for my $part (@{$schematic->{partlist}}) {
         if (defined($part->{position}[0]) && defined($part->{position}[1]) && defined($part->{position}[2])){
             my $node = $dom->createElement('part');
             $parts->addChild($node);
@@ -119,7 +118,7 @@ sub writeFile {
             $chip->addChild($dom->createAttribute( Z => $part->{chipsize}[2]));
         }
     }
-    my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));
+    my ($base,$path,$type) = fileparse($schematic->{filename},('.sch','.SCH','3de','.3DE'));
     my $newpath = $path . $base . ".3de";
     return $dom->toFile($newpath, 0);
 }

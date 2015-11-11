@@ -17,16 +17,15 @@ use Slic3r::Electronics::Filereaders::3DElectronics;
 #######################################################################
 sub readFile {
     my $self = shift;
-    my ($filename) = @_;
-    
+    my ($filename, $config) = @_;
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));
-    my @schematic;
+    my $schematic;
     if ($type eq "sch" || $type eq "SCH" || $type eq ".sch" || $type eq ".SCH") {
-        @schematic = Slic3r::Electronics::Filereaders::Eagle->readFile($filename);
-        return ($filename, @schematic);
+        $schematic = Slic3r::Electronics::Filereaders::Eagle->readFile($filename, $config);
+        return $schematic;
     } elsif ($type eq "3de" || $type eq "3DE" || $type eq ".3de" || $type eq ".3DE") {
-        ($filename, @schematic) = Slic3r::Electronics::Filereaders::3DElectronics->readFile($filename);
-        return ($filename, @schematic);
+        $schematic = Slic3r::Electronics::Filereaders::3DElectronics->readFile($filename, $config);
+        return $schematic;
     }
     
     return ;
@@ -40,7 +39,8 @@ sub readFile {
 #######################################################################
 sub writeFile {
     my $self = shift;
-    return Slic3r::Electronics::Filereaders::3DElectronics->writeFile(@_);
+    my ($schematic) = @_;
+    return Slic3r::Electronics::Filereaders::3DElectronics->writeFile($schematic);
 }
 
 1;

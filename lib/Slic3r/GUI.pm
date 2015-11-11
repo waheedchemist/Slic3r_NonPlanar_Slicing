@@ -87,7 +87,7 @@ sub OnInit {
     # just checking for existence of $datadir is not enough: it may be an empty directory
     # supplied as argument to --datadir; in that case we should still run the wizard
     my $run_wizard = (-d $enc_datadir && -e "$enc_datadir/slic3r.ini") ? 0 : 1;
-    foreach my $dir ($enc_datadir, "$enc_datadir/print", "$enc_datadir/filament", "$enc_datadir/printer") {
+    foreach my $dir ($enc_datadir, "$enc_datadir/print", "$enc_datadir/filament", "$enc_datadir/printer", "$enc_datadir/electronics") {
         next if -d $dir;
         if (!mkdir $dir) {
             my $error = "Slic3r was unable to create its data directory at $dir ($!).";

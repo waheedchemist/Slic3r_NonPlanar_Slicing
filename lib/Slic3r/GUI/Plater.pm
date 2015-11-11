@@ -54,8 +54,7 @@ sub new {
     $self->{print} = Slic3r::Print->new;
     $self->{objects} = [];
     
-    $self->{schematic} = [];
-    $self->{filename} = "";
+    $self->{schematic} = undef;
     
     $self->{print}->set_status_cb(sub {
         my ($percent, $message) = @_;
@@ -1565,7 +1564,6 @@ sub object_electronics_dialog {
         object          => $self->{objects}[$obj_idx],
         model_object    => $model_object,
         schematic       => $self->{schematic},
-        filename        => $self->{filename},
     );
     $self->pause_background_process;
     $dlg->Show;

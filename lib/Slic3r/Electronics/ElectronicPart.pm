@@ -96,6 +96,7 @@ sub setChipsize {
 #######################################################################
 sub getChipsize {
     my $self = shift;
+    my ($config) = @_;
     if (!(defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]))) {
         my $xmin = 0;
         my $ymin = 0;
@@ -115,7 +116,10 @@ sub getChipsize {
                 $ymax = max($ymax, $pad->{position}[1]+($pad->{drill}/2+0.25));
             }
         }
-        @{$self->{chipsize}} = ($xmax-$xmin,$ymax-$ymin,$self->getChipheight);
+        my $x = $xmax-$xmin+$config->{offset}{chip_x_offset};
+        my $y = $ymax-$ymin+$config->{offset}{chip_y_offset};
+        my $z = $self->getChipheight($config)+$config->{offset}{chip_z_offset};
+        @{$self->{chipsize}} = ($x,$y,$z);
     }
     
     return @{$self->{chipsize}};
@@ -129,7 +133,12 @@ sub getChipsize {
 #######################################################################
 sub getChipheight {
     my $self = shift;
-    return 1;
+    my ($config) = @_;
+    if ($config->{chip_height}{$self->{package}}) {
+        return $config->{chip_height}{$self->{package}};
+    } else {
+        return $config->{chip_height}{default};
+    }
 }
 
 #######################################################################
@@ -173,8 +182,9 @@ sub getFootprintModel {
 #######################################################################
 sub getChipModel {
     my $self = shift;
+    my ($config) = @_;
     my @triangles = ();
-    push @triangles, Slic3r::Electronics::Geometrics->getCube((0,0,0), $self->getChipsize);
+    push @triangles, Slic3r::Electronics::Geometrics->getCube((0,0,0), $self->getChipsize($config));
     my $model = $self->getTriangleMesh(@triangles);
     return $model;
 }
@@ -242,7 +252,7 @@ use utf8;
 
 #######################################################################
 # Purpose    : Creates a new pad
-# Parameters : type, name, x, y, r, dx, dy, drill, shape of the pad
+# Parameters : type, pin, pad, gate, x, y, r, dx, dy, drill, shape of the pad
 # Returns    : A new Pad
 # Commet     : 
 #######################################################################
@@ -250,9 +260,11 @@ sub new {
     my $class = shift;
     my $self = {};
     bless ($self, $class);
-    my ($type,$name,$x,$y,$r,$dx,$dy,$drill,$shape) = @_;
+    my ($type,$pad,$pin,$gate,$x,$y,$r,$dx,$dy,$drill,$shape) = @_;
     $self->{type} = $type;
-    $self->{name} = $name;
+    $self->{pad} = $pad;
+    $self->{pin} = $pin;
+    $self->{gate} = $gate;
     $self->{drill} = $drill;
     $self->{shape} = $shape;
     

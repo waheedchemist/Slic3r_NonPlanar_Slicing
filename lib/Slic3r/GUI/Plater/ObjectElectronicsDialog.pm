@@ -20,7 +20,7 @@ sub new {
     $self->{$_} = $params{$_} for keys %params;
     
     $self->{tabpanel} = Wx::Notebook->new($self, -1, wxDefaultPosition, wxDefaultSize, wxNB_TOP | wxTAB_TRAVERSAL);
-    $self->{tabpanel}->AddPage($self->{parts} = Slic3r::GUI::Plater::ElectronicsPanel->new($self->{tabpanel},$print, model_object => $params{model_object}, schematic => $params{schematic},filename => $params{filename}), "Electronics");
+    $self->{tabpanel}->AddPage($self->{parts} = Slic3r::GUI::Plater::ElectronicsPanel->new($self->{tabpanel},$print, model_object => $params{model_object}, schematic => $params{schematic}), "Electronics");
         
     my $sizer = Wx::BoxSizer->new(wxVERTICAL);
     $sizer->Add($self->{tabpanel}, 1, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 10);
@@ -40,6 +40,7 @@ use utf8;
 use Slic3r::Print::State ':steps';
 use Slic3r::Electronics::Electronics;
 use Slic3r::GUI::Electronics3DScene;
+use Slic3r::Config;
 use File::Basename qw(basename);
 use Wx qw(:misc :sizer :slider :treectrl :button :filedialog wxTAB_TRAVERSAL wxSUNKEN_BORDER wxBITMAP_TYPE_PNG wxFD_OPEN wxFD_FILE_MUST_EXIST wxID_OK
     wxTheApp);
@@ -69,16 +70,23 @@ sub new {
     
     my $object = $self->{model_object} = $params{model_object};
     my $schematic = $self->{schematic} = $params{schematic};
-    my $filename = $self->{filename} = $params{filename};
     my $place = $self->{place} = 0;
     $self->{model_object}->update_bounding_box;
     my $root_offset = $self->{root_offset} = $self->{model_object}->_bounding_box->center;
+    
+    my $configfile ||= Slic3r::decode_path(Wx::StandardPaths::Get->GetUserDataDir . "/electronics/electronics.ini");
+    my $config = $self->{config};
+    if (-f $configfile) {
+        $self->{config} = eval { Slic3r::Config->read_ini($configfile) };
+    } else {
+        $self->createDefaultConfig($configfile);
+    }
     
     # upper buttons
     my $btn_load_netlist = $self->{btn_load_netlist} = Wx::Button->new($self, -1, "Load netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # upper buttons sizer
-    my $buttons_sizer = Wx::BoxSizer->new(wxHORIZONTAL);
+    my $buttons_sizer = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer->Add($btn_load_netlist, 0);
     $btn_load_netlist->SetFont($Slic3r::GUI::small_font);
     
@@ -104,7 +112,7 @@ sub new {
     my $btn_remove_part = $self->{btn_remove_part} = Wx::Button->new($self, -1, "Remove Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # mid buttons sizer
-    my $buttons_sizer_mid = Wx::BoxSizer->new(wxHORIZONTAL | wxEXPAND);
+    my $buttons_sizer_mid = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer_mid->Add($btn_place_part, 0);
     $buttons_sizer_mid->Add($btn_remove_part, 0);
     $btn_place_part->SetFont($Slic3r::GUI::small_font);
@@ -130,13 +138,13 @@ sub new {
     my $height_field = $self->{height_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
     
     my $position_text = $self->{position_text} = Wx::StaticText->new($self, -1, "Position:",wxDefaultPosition,[100,-1]);
-    my $x_text = $self->{x_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
+    my $x_text = $self->{x_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[25,-1]);
     my $x_field = $self->{x_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
-    my $y_text = $self->{y_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
+    my $y_text = $self->{y_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[25,-1]);
     my $y_field = $self->{y_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
-    my $z_text = $self->{z_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
+    my $z_text = $self->{z_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[25,-1]);
     my $z_field = $self->{z_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
     my $rotation_text = $self->{rotation_text} = Wx::StaticText->new($self, -1, "Rotation:",wxDefaultPosition,[100,-1]);
@@ -160,6 +168,29 @@ sub new {
     my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
     my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[100,-1]);
+    
+    my $btn_xp = $self->{btn_xp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_xm = $self->{btn_xm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_yp = $self->{btn_yp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_ym = $self->{btn_ym} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_zp = $self->{btn_zp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_zm = $self->{btn_zm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    
+    my $sizer_x = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $sizer_y = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $sizer_z = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    
+    $sizer_x->Add($self->{x_text}, 1,wxTOP, 0);
+    $sizer_x->Add($self->{btn_xm}, 1,wxTOP, 0);
+    $sizer_x->Add($self->{btn_xp}, 1,wxTOP, 0);
+    
+    $sizer_y->Add($self->{y_text}, 1,wxTOP, 0);
+    $sizer_y->Add($self->{btn_ym}, 1,wxTOP, 0);
+    $sizer_y->Add($self->{btn_yp}, 1,wxTOP, 0);
+    
+    $sizer_z->Add($self->{z_text}, 1,wxTOP, 0);
+    $sizer_z->Add($self->{btn_zm}, 1,wxTOP, 0);
+    $sizer_z->Add($self->{btn_zp}, 1,wxTOP, 0);
     
     # settings sizer
     my $settings_sizer_main = Wx::StaticBoxSizer->new($self->{staticbox} = Wx::StaticBox->new($self, -1, "Part Settings"),wxVERTICAL);
@@ -187,9 +218,9 @@ sub new {
     $settings_sizer_positions->Add($self->{position_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{x_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{y_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{z_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($sizer_x, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($sizer_y, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($sizer_z, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{x_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{y_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{z_field}, 1,wxTOP, 0);
@@ -220,7 +251,7 @@ sub new {
     my $btn_save_netlist = $self->{btn_save_netlist} = Wx::Button->new($self, -1, "Save netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # lower buttons sizer
-    my $buttons_sizer_bottom = Wx::BoxSizer->new(wxHORIZONTAL);
+    my $buttons_sizer_bottom = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer_bottom->Add($btn_save_netlist, 0);
     $btn_save_netlist->SetFont($Slic3r::GUI::small_font);
     
@@ -262,6 +293,13 @@ sub new {
         $canvas = $self->{canvas} = Slic3r::GUI::Electronics3DScene->new($self);
         $canvas->enable_picking(1);
         $canvas->select_by('volume');
+        
+        $canvas->on_select(sub {
+            my ($volume_idx) = @_;
+            
+            # convert scene volume to model object volume
+            $self->reload_tree($canvas->volume_idx($volume_idx));
+        });
                 
         $canvas->load_object($self->{model_object}, undef, [0]);
         $canvas->set_auto_bed_shape;
@@ -318,9 +356,54 @@ sub new {
         $self->saveButtonPressed;
     });
     
+    EVT_BUTTON($self, $self->{btn_xp}, sub { 
+        $self->movePart($self->{config}->{_}{move_step},0,0);
+    });
+    
+    EVT_BUTTON($self, $self->{btn_xm}, sub { 
+        $self->movePart($self->{config}->{_}{move_step}*-1,0,0);
+    });
+    
+    EVT_BUTTON($self, $self->{btn_yp}, sub { 
+        $self->movePart(0,$self->{config}->{_}{move_step},0);
+    });
+    
+    EVT_BUTTON($self, $self->{btn_ym}, sub { 
+        $self->movePart(0,-$self->{config}->{_}{move_step}*-1,0);
+    });
+    
+    EVT_BUTTON($self, $self->{btn_zp}, sub { 
+        $self->movePart(0,0,1);
+    });
+    
+    EVT_BUTTON($self, $self->{btn_zm}, sub { 
+        $self->movePart(0,0,-1);
+    });
+    
     $self->reload_tree;
     
     return $self;
+}
+
+#######################################################################
+# Purpose    : Writes the default configutation
+# Parameters : $configfile to write
+# Returns    : none
+# Commet     : 
+#######################################################################
+sub createDefaultConfig {
+    my $self = shift;
+    my ($configfile) = @_;
+    $self->{config}->{_}{move_step} = 0.1;
+    $self->{config}->{_}{footprint_extruder} = 0;
+    $self->{config}->{_}{part_extruder} = 0;
+    
+    $self->{config}->{offset}{chip_x_offset} = 0;
+    $self->{config}->{offset}{chip_y_offset} = 0;
+    $self->{config}->{offset}{chip_z_offset} = 0;
+    
+    $self->{config}->{chip_height}{default} = 1;
+    Slic3r::Config->write_ini($configfile, $self->{config});
 }
 
 #######################################################################
@@ -340,7 +423,7 @@ sub reload_print {
 # Purpose    : loads the print and the objects on the canvas
 # Parameters : none
 # Returns    : undef if not loaded
-# Commet     : First loads Print, second footprints and third pars
+# Commet     : First loads Print, second footprints and third parts
 #######################################################################
 sub load_print {
     my ($self) = @_;
@@ -418,9 +501,11 @@ sub placePart {
     my $self = shift;
     my ($part, $x, $y, $z) = @_;
     my @offset = @{$self->{root_offset}};
-    $part->setPosition($x-$offset[0], $y-$offset[1], $z);
+    $x = int(($x-$offset[0])*100)/100.0;
+    $y = int(($y-$offset[1])*100)/100.0;
+    $part->setPosition($x, $y, $z);
     $self->displayPart($part);
-    $self->reload_tree;
+    $self->reload_tree($self->findVolumeId($part->{volume}));
 }
 
 #######################################################################
@@ -455,13 +540,13 @@ sub displayPart {
                 $new_volume->set_material_id(0);
                 
                 # set a default extruder value, since user can't add it manually
-                $new_volume->config->set_ifndef('extruder', 0);
+                $new_volume->config->set_ifndef('extruder', $self->{config}->{_}{footprint_extruder});
                 
                 $part->{volume} = $new_volume;
             }
         }
         
-        my $chip_model = $part->getChipModel;
+        my $chip_model = $part->getChipModel($self->{config});
             
         foreach my $object (@{$chip_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
@@ -471,7 +556,7 @@ sub displayPart {
                 $new_volume->set_material_id(0);
                 
                 # set a default extruder value, since user can't add it manually
-                $new_volume->config->set_ifndef('extruder', 0);
+                $new_volume->config->set_ifndef('extruder', $self->{config}->{_}{part_extruder});
                 
                 $part->{chipVolume} = $new_volume;
             }
@@ -509,7 +594,6 @@ sub removePart {
     $self->reload_tree;
 }
 
-# reloads the model tree
 #######################################################################
 # Purpose    : Reloads the model tree
 # Parameters : currently selected volume
@@ -551,34 +635,29 @@ sub reload_tree {
             volume      => $volume,
         });
     }
-    my $length = @{$self->{schematic}};
-    if ($length > 0) {
-        my $eIcon = ICON_PCB;
-        my $eItemId = $tree->AppendItem($rootId, "unplaced");
-        $tree->SetPlData($eItemId, {
-            type        => 'unplaced',
-            volume_id   => 0,
-        });
-        foreach my $part (@{$self->{schematic}}) {
-            if (!$part->{volume}) {
-                my $ItemId = $tree->AppendItem($eItemId, $part->{name}, $eIcon);
-                $tree->SetPlData($ItemId, {
-                    type        => 'part',
-                    part        => $part,
-                });
+    if (defined $self->{schematic}) {
+        my $length = @{$self->{schematic}->{partlist}};
+        if ($length > 0) {
+            my $eIcon = ICON_PCB;
+            my $eItemId = $tree->AppendItem($rootId, "unplaced");
+            $tree->SetPlData($eItemId, {
+                type        => 'unplaced',
+                volume_id   => 0,
+            });
+            foreach my $part (@{$self->{schematic}->{partlist}}) {
+                if (!$part->{volume}) {
+                    my $ItemId = $tree->AppendItem($eItemId, $part->{name}, $eIcon);
+                    $tree->SetPlData($ItemId, {
+                        type        => 'part',
+                        part        => $part,
+                    });
+                }
             }
         }
     }
     $tree->ExpandAll;
     
-    Slic3r::GUI->CallAfter(sub {
-        $self->{tree}->SelectItem($selectedId);
-        
-        # SelectItem() should trigger EVT_TREE_SEL_CHANGED as per wxWidgets docs,
-        # but in fact it doesn't if the given item is already selected (this happens
-        # on first load)
-        $self->selection_changed;
-    });
+    $self->{tree}->SelectItem($selectedId);
 }
 
 #######################################################################
@@ -741,7 +820,6 @@ sub savePartInfo {
         
 }
 
-# Load button event
 #######################################################################
 # Purpose    : Event for load button
 # Parameters : $file to load
@@ -764,11 +842,11 @@ sub loadButtonPressed {
         $file = Slic3r::decode_path($dlg->GetPaths);
         $dlg->Destroy;
     }
-    for my $part (@{$self->{schematic}}) {
+    for my $part (@{$self->{schematic}->{partlist}}) {
         $self->removePart($part);
     }
-    ($self->{filename}, @{$self->{schematic}}) = Slic3r::Electronics::Electronics->readFile($file);
-    for my $part (@{$self->{schematic}}) {
+    $self->{schematic} = Slic3r::Electronics::Electronics->readFile($file, $self->{config});
+    for my $part (@{$self->{schematic}->{partlist}}) {
         $self->displayPart($part);
     }
 
@@ -843,8 +921,8 @@ sub savePartButtonPressed {
     }
     if ($part) {
         $self->savePartInfo($part);
+        $self->reload_tree($self->findVolumeId($part->{volume}));
     }
-    $self->reload_tree;
 }
 
 #######################################################################
@@ -855,11 +933,34 @@ sub savePartButtonPressed {
 #######################################################################
 sub saveButtonPressed {
     my $self = shift;
-    my ($base,$path,$type) = fileparse($self->{filename},('.sch','.SCH','3de','.3DE'));
-    if (Slic3r::Electronics::Electronics->writeFile($self->{filename},@{$self->{schematic}})) {
+    my ($base,$path,$type) = fileparse($self->{schematic}->{filename},('.sch','.SCH','3de','.3DE'));
+    if (Slic3r::Electronics::Electronics->writeFile($self->{schematic},$self->{config})) {
         Wx::MessageBox('File saved as '.$base.'.3de','Saved', Wx::wxICON_INFORMATION | Wx::wxOK,undef)
     } else {
         Wx::MessageBox('Saving failed','Failed',Wx::wxICON_ERROR | Wx::wxOK,undef)
+    }
+}
+
+#######################################################################
+# Purpose    : MovesPart with Buttons
+# Parameters : x, y and z coordinates
+# Returns    : none
+# Commet     : moves Z by layer thickness
+#######################################################################
+sub movePart {
+    my $self = shift;
+    my ($x,$y,$z) = @_;
+    my $selected = $self->get_selection;
+    my $part = $self->findPartByVolume($selected->{volume});
+    if ($part) {
+        if ($z != 0) {
+            $part->{position}[2] += $self->get_layer_thickness($part->{position}[2])*$z;
+        }
+        $part->{position}[0] += $x;
+        $part->{position}[1] += $y;
+        $self->showPartInfo($part);
+        $self->displayPart($part);
+        $self->reload_tree($self->findVolumeId($part->{volume}));
     }
 }
 
@@ -872,10 +973,12 @@ sub saveButtonPressed {
 sub findPartByVolume {
     my $self = shift;
     my ($volume) = @_;
-    for my $part (@{$self->{schematic}}) {
-        if (Dumper($part->{volume}) eq Dumper($volume) || Dumper($part->{chipVolume}) eq Dumper($volume)) {
-            return $part;  
-        } 
+    if (defined $self->{schematic}) {
+        for my $part (@{$self->{schematic}->{partlist}}) {
+            if (Dumper($part->{volume}) eq Dumper($volume) || Dumper($part->{chipVolume}) eq Dumper($volume)) {
+                return $part;  
+            } 
+        }
     }
     return;
 }
