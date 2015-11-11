@@ -20,6 +20,12 @@ sub new {
     return $self
 }
 
+#######################################################################
+# Purpose    : Adds a new Pin to the Net
+# Parameters : see Slic3r::Electronics::ElectronicNetPin
+# Returns    : none
+# Commet     : 
+#######################################################################
 sub addPin {
     my $self = shift;
     my $pad = Slic3r::Electronics::ElectronicNetPin->new(@_);
