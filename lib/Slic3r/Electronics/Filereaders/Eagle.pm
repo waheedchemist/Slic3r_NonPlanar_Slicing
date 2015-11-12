@@ -8,8 +8,6 @@ use Slic3r::Electronics::ElectronicPart;
 use Slic3r::Electronics::ElectronicNet;
 use List::Util qw[min max];
 
-use Data::Dumper;
-
 #######################################################################
 # Purpose    : Reads file of the Eagle type
 # Parameters : Filename to read
@@ -163,7 +161,6 @@ sub readFile {
         }
     }
     
-    print Dumper($schematic);
     return $schematic;
 }
 
