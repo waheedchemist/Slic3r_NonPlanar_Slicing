@@ -845,7 +845,7 @@ sub loadButtonPressed {
     for my $part (@{$self->{schematic}->{partlist}}) {
         $self->removePart($part);
     }
-    $self->{schematic} = Slic3r::Electronics::Electronics->readFile($file, $self->{config});
+    Slic3r::Electronics::Electronics->readFile($file,$self->{schematic}, $self->{config});
     for my $part (@{$self->{schematic}->{partlist}}) {
         $self->displayPart($part);
     }

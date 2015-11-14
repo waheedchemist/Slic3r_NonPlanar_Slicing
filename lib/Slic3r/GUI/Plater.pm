@@ -54,7 +54,7 @@ sub new {
     $self->{print} = Slic3r::Print->new;
     $self->{objects} = [];
     
-    $self->{schematic} = undef;
+    $self->{schematic} = {};
     
     $self->{print}->set_status_cb(sub {
         my ($percent, $message) = @_;

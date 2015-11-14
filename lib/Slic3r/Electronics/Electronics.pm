@@ -17,18 +17,13 @@ use Slic3r::Electronics::Filereaders::3DElectronics;
 #######################################################################
 sub readFile {
     my $self = shift;
-    my ($filename, $config) = @_;
+    my ($filename, $schematic, $config) = @_;
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));
-    my $schematic;
     if ($type eq "sch" || $type eq "SCH" || $type eq ".sch" || $type eq ".SCH") {
-        $schematic = Slic3r::Electronics::Filereaders::Eagle->readFile($filename, $config);
-        return $schematic;
+        Slic3r::Electronics::Filereaders::Eagle->readFile($filename,$schematic, $config);
     } elsif ($type eq "3de" || $type eq "3DE" || $type eq ".3de" || $type eq ".3DE") {
-        $schematic = Slic3r::Electronics::Filereaders::3DElectronics->readFile($filename, $config);
-        return $schematic;
+        Slic3r::Electronics::Filereaders::3DElectronics->readFile($filename,$schematic, $config);
     }
-    
-    return ;
 }
 
 #######################################################################

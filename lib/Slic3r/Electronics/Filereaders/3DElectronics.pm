@@ -15,16 +15,15 @@ use Slic3r::Electronics::ElectronicPart;
 #######################################################################
 sub readFile {
     my $self = shift;
-    my ($filename, $config) = @_;
+    my ($filename,$schematic, $config) = @_;
 
     my $parser = XML::LibXML->new();
     my $xmldoc = $parser->parse_file($filename);
     my ($base,$path,$type) = fileparse($filename,('.sch','.SCH','3de','.3DE'));
-    my $schematic;
     $schematic->{partlist} = ();
     for my $files ($xmldoc->findnodes('/electronics/filename')) {
         $schematic->{filename} = $files->getAttribute('source');
-        $schematic = Slic3r::Electronics::Electronics->readFile($path . $schematic->{filename});
+        Slic3r::Electronics::Electronics->readFile($path . $schematic->{filename},$schematic, $config);
     }
     for my $node ($xmldoc->findnodes('/electronics/parts/part')) {
         my $name = $node->getAttribute('name');

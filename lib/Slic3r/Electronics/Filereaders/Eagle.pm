@@ -16,12 +16,11 @@ use List::Util qw[min max];
 #######################################################################
 sub readFile {
     my $self = shift;
-    my ($filename, $config) = @_;
+    my ($filename,$schematic, $config) = @_;
 
     my $parser = XML::LibXML->new();
     my $xmldoc = $parser->parse_file($filename);
     
-    my $schematic;
     $schematic->{filename} = $filename;
 
     for my $sheet ($xmldoc->findnodes('/eagle/drawing/schematic/sheets/sheet')) {
@@ -97,7 +96,10 @@ sub readFile {
                                 );
                             }
                         }
-                        my ($xmin,$ymin,$xmax,$ymax) = (0,0,0,0);
+                        my $xmin = 0;
+                        my $ymin = 0;
+                        my $xmax = 0;
+                        my $ymax = 0;
                         for my $packagelist ($xmldoc->findnodes("/eagle/drawing/schematic/libraries/library[\@name='$library']/packages/package[\@name='$package']/wire")) {
                             if (21 == $packagelist->getAttribute('layer') || 51 == $packagelist->getAttribute('layer')){
                                 my $x1 = $packagelist->getAttribute('x1');
