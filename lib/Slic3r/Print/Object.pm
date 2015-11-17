@@ -308,7 +308,7 @@ sub slice {
     
     # remove empty layers from bottom
     while (@{$self->layers} && !@{$self->get_layer(0)->slices}) {
-        shift @{$self->layers};
+        $self->delete_layer(0);
         for (my $i = 0; $i <= $#{$self->layers}; $i++) {
             $self->get_layer($i)->set_id( $self->get_layer($i)->id-1 );
         }
@@ -319,7 +319,7 @@ sub slice {
         $self->_simplify_slices(scale($self->print->config->resolution));
     }
     
-    die "No layers were detected. You might want to repair your STL file(s) or check their size and retry.\n"
+    die "No layers were detected. You might want to repair your STL file(s) or check their size or thickness and retry.\n"
         if !@{$self->layers};
     
     $self->set_typed_slices(0);
@@ -437,7 +437,7 @@ sub make_perimeters {
                     $slice->extra_perimeters($slice->extra_perimeters + 1);
                 }
                 Slic3r::debugf "  adding %d more perimeter(s) at layer %d\n",
-                    $slice->extra_perimeters, $layerm->id
+                    $slice->extra_perimeters, $layerm->layer->id
                     if $slice->extra_perimeters > 0;
             }
         }
@@ -686,7 +686,7 @@ sub detect_surfaces_type {
             # as bottom surfaces (to allow for bridge detection)
             if (@top && @bottom) {
                 my $overlapping = intersection_ex([ map $_->p, @top ], [ map $_->p, @bottom ]);
-                Slic3r::debugf "  layer %d contains %d membrane(s)\n", $layerm->id, scalar(@$overlapping)
+                Slic3r::debugf "  layer %d contains %d membrane(s)\n", $layerm->layer->id, scalar(@$overlapping)
                     if $Slic3r::debug;
                 @top = $difference->([map $_->expolygon, @top], $overlapping, S_TYPE_TOP);
             }
@@ -703,7 +703,7 @@ sub detect_surfaces_type {
             $layerm->slices->append($_) for (@bottom, @top, @internal);
             
             Slic3r::debugf "  layer %d has %d bottom, %d top and %d internal surfaces\n",
-                $layerm->id, scalar(@bottom), scalar(@top), scalar(@internal) if $Slic3r::debug;
+                $layerm->layer->id, scalar(@bottom), scalar(@top), scalar(@internal) if $Slic3r::debug;
         }
         
         # clip surfaces to the fill boundaries
@@ -1072,7 +1072,7 @@ sub combine_infill {
                      + $layerms[-1]->flow(FLOW_ROLE_PERIMETER)->scaled_width / 2
                      # Because fill areas for rectilinear and honeycomb are grown 
                      # later to overlap perimeters, we need to counteract that too.
-                     + (($type == S_TYPE_INTERNALSOLID || $region->config->fill_pattern =~ /(rectilinear|honeycomb)/)
+                     + (($type == S_TYPE_INTERNALSOLID || $region->config->fill_pattern =~ /(rectilinear|grid|line|honeycomb)/)
                        ? $layerms[-1]->flow(FLOW_ROLE_SOLID_INFILL)->scaled_width
                        : 0)
                      )}, @$intersection;

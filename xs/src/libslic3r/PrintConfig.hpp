@@ -12,7 +12,7 @@ enum GCodeFlavor {
 };
 
 enum InfillPattern {
-    ipRectilinear, ipLine, ipConcentric, ipHoneycomb, ip3DHoneycomb,
+    ipRectilinear, ipGrid, ipLine, ipConcentric, ipHoneycomb, ip3DHoneycomb,
     ipHilbertCurve, ipArchimedeanChords, ipOctagramSpiral,
 };
 
@@ -39,6 +39,7 @@ template<> inline t_config_enum_values ConfigOptionEnum<GCodeFlavor>::get_enum_v
 template<> inline t_config_enum_values ConfigOptionEnum<InfillPattern>::get_enum_values() {
     t_config_enum_values keys_map;
     keys_map["rectilinear"]         = ipRectilinear;
+    keys_map["grid"]                = ipGrid;
     keys_map["line"]                = ipLine;
     keys_map["concentric"]          = ipConcentric;
     keys_map["honeycomb"]           = ipHoneycomb;
@@ -149,7 +150,7 @@ class PrintObjectConfig : public virtual StaticPrintConfig
         this->xy_size_compensation.value                         = 0;
     };
     
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(dont_support_bridges);
         OPT_PTR(extrusion_width);
         OPT_PTR(first_layer_height);
@@ -259,7 +260,7 @@ class PrintRegionConfig : public virtual StaticPrintConfig
         this->top_solid_layers.value                             = 3;
     };
     
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(bottom_solid_layers);
         OPT_PTR(bridge_flow_ratio);
         OPT_PTR(bridge_speed);
@@ -358,7 +359,7 @@ class GCodeConfig : public virtual StaticPrintConfig
         this->use_volumetric_e.value                             = false;
     };
     
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(before_layer_gcode);
         OPT_PTR(end_gcode);
         OPT_PTR(extrusion_axis);
@@ -517,7 +518,7 @@ class PrintConfig : public GCodeConfig
         this->z_offset.value                                     = 0;
     };
     
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(avoid_crossing_perimeters);
         OPT_PTR(bed_shape);
         OPT_PTR(bed_temperature);
@@ -588,7 +589,7 @@ class HostConfig : public virtual StaticPrintConfig
         this->octoprint_apikey.value                            = "";
     };
     
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(octoprint_host);
         OPT_PTR(octoprint_apikey);
         
@@ -600,7 +601,7 @@ class FullPrintConfig
     : public PrintObjectConfig, public PrintRegionConfig, public PrintConfig, public HostConfig
 {
     public:
-    ConfigOption* option(const t_config_option_key opt_key, bool create = false) {
+    ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         ConfigOption* opt;
         if ((opt = PrintObjectConfig::option(opt_key, create)) != NULL) return opt;
         if ((opt = PrintRegionConfig::option(opt_key, create)) != NULL) return opt;
