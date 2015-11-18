@@ -735,14 +735,16 @@ sub set_z {
 sub get_layer_thickness {
     my $self = shift;
     my ($z) = @_;
+    my $i = 0;
     for my $layer (@{$self->{layers_z}}) {
-        if ($z >= $layer) {
-            if (!$_) {
+        if ($z <= $layer) {
+            if ($i == 0) {
                 return $layer;
             } else {
-                return $layer - $self->{layers_z}[$_-1];
+                return sprintf "%.2f", $layer - $self->{layers_z}[$i-1];
             }
         }
+        $i += 1;
     }
 }
 
