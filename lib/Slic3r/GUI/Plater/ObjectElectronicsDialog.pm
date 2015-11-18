@@ -321,7 +321,7 @@ sub new {
     
     # attach events
     EVT_SLIDER($self, $slider, sub {
-        $self->reload_print if $self->enabled;
+        $self->sliderMoved if $self->enabled;
     });
 
     # Item tree cant collapse
@@ -407,6 +407,29 @@ sub createDefaultConfig {
 }
 
 #######################################################################
+# Purpose    : Reloads canvas when necesary
+# Parameters : none
+# Returns    : none
+# Commet     : 
+#######################################################################
+sub sliderMoved {
+    my $self = shift;
+    my $height =  $self->{layers_z}[$self->{slider}->GetValue];
+    my $changed = 0;
+    
+    for my $part (@{$self->{schematic}->{partlist}}) {
+        if (($part->{shown} == 0 && $part->{position}[2]-$part->{height} <= $height) ||
+            ($part->{shown} == 1 && $part->{position}[2]-$part->{height} > $height)) {
+            $changed = 1;
+        }
+    }
+    $self->set_z($height);
+    if ($changed == 1) {
+        $self->reload_print;
+    }
+}
+            
+#######################################################################
 # Purpose    : Reloads the print on the canvas
 # Parameters : none
 # Returns    : none
@@ -416,6 +439,9 @@ sub reload_print {
     my ($self) = @_;
     $self->canvas->reset_objects;
     $self->_loaded(0);
+    for my $part (@{$self->{schematic}->{partlist}}) {
+        $part->{shown} = 0;
+    }
     $self->load_print;
 }
 
@@ -479,6 +505,7 @@ sub load_print {
             my $part = $self->findPartByVolume($volume);
             if ($part && $part->{position}[2]-$part->{height} <= $height) {
                 $self->canvas->load_object($model_object,undef,[0],[$volume_idx]);
+                $part->{shown} = 1;
             }
         }
         $self->set_z($height) if $self->enabled;
@@ -724,6 +751,7 @@ sub set_z {
     return if !$self->enabled;
     $self->{z_label}->SetLabel(sprintf '%.2f', $z);
     $self->canvas->set_toolpaths_range(0, $z);
+    $self->canvas->Refresh if $self->IsShown;
 }
 
 #######################################################################

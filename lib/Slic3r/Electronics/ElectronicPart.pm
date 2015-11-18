@@ -26,6 +26,7 @@ sub new {
     $self->{height} = undef;
     $self->{volume} = undef;
     $self->{chipVolume} = undef;
+    $self->{shown} = 0;
     
     my @position = @{$self->{position}} = (undef,undef,undef);
     my @rotation = @{$self->{rotation}} = (0,0,0);
