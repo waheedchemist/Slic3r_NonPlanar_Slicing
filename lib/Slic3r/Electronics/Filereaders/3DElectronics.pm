@@ -34,7 +34,8 @@ sub readFile {
         my $height = undef;
         my @position = undef;
         my @rotation = undef;
-        my @chipsize = undef;
+        my @partpos = undef;
+        my @partsize = undef;
         for my $h ($node->findnodes('./attributes')) {
             $height = $h->getAttribute('height');
         }
@@ -45,7 +46,10 @@ sub readFile {
             @rotation = ($rot->getAttribute('X'),$rot->getAttribute('Y'),$rot->getAttribute('Z'));
         }
         for my $chip ($node->findnodes('./partsize')) {
-            @chipsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
+            @partsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
+        }
+        for my $partpos ($node->findnodes('./partpos')) {
+            @partpos = ($partpos->getAttribute('X'),$partpos->getAttribute('Y'),$partpos->getAttribute('Z'));
         }
         for my $part (@{$schematic->{partlist}}) {
             if (($part->{name} eq $name) && 
@@ -56,7 +60,8 @@ sub readFile {
                 $part->{height} = $height;
                 @{$part->{position}} = @position;
                 @{$part->{rotation}} = @rotation;
-                @{$part->{chipsize}} = @chipsize;
+                @{$part->{partsize}} = @partsize;
+                @{$part->{partpos}} = @partpos;
             }
         }
     }
@@ -112,9 +117,15 @@ sub writeFile {
             
             my $chip = $dom->createElement('partsize');
             $node->addChild($chip);
-            $chip->addChild($dom->createAttribute( X => $part->{chipsize}[0]));
-            $chip->addChild($dom->createAttribute( Y => $part->{chipsize}[1]));
-            $chip->addChild($dom->createAttribute( Z => $part->{chipsize}[2]));
+            $chip->addChild($dom->createAttribute( X => $part->{partsize}[0]));
+            $chip->addChild($dom->createAttribute( Y => $part->{partsize}[1]));
+            $chip->addChild($dom->createAttribute( Z => $part->{partsize}[2]));
+            
+            my $partpos = $dom->createElement('partpos');
+            $node->addChild($partpos);
+            $partpos->addChild($dom->createAttribute( X => $part->{partpos}[0]));
+            $partpos->addChild($dom->createAttribute( Y => $part->{partpos}[1]));
+            $partpos->addChild($dom->createAttribute( Z => $part->{partpos}[2]));
         }
     }
     my ($base,$path,$type) = fileparse($schematic->{filename},('.sch','.SCH','3de','.3DE'));

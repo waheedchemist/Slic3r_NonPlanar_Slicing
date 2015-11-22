@@ -86,7 +86,7 @@ sub new {
     my $btn_load_netlist = $self->{btn_load_netlist} = Wx::Button->new($self, -1, "Load netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # upper buttons sizer
-    my $buttons_sizer = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $buttons_sizer = Wx::FlexGridSizer->new( 1, 3, 1, 5);
     $buttons_sizer->Add($btn_load_netlist, 0);
     $btn_load_netlist->SetFont($Slic3r::GUI::small_font);
     
@@ -112,7 +112,7 @@ sub new {
     my $btn_remove_part = $self->{btn_remove_part} = Wx::Button->new($self, -1, "Remove Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # mid buttons sizer
-    my $buttons_sizer_mid = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $buttons_sizer_mid = Wx::FlexGridSizer->new( 1, 3, 1, 5);
     $buttons_sizer_mid->Add($btn_place_part, 0);
     $buttons_sizer_mid->Add($btn_remove_part, 0);
     $btn_place_part->SetFont($Slic3r::GUI::small_font);
@@ -167,6 +167,16 @@ sub new {
     my $zs_text = $self->{zs_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
     my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
     
+    my $partpos_text = $self->{partpos_text} = Wx::StaticText->new($self, -1, "Part position:",wxDefaultPosition,[100,-1]);
+    my $xp_text = $self->{xp_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
+    my $xp_field = $self->{xp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
+    my $yp_text = $self->{yp_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
+    my $yp_field = $self->{yp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
+    my $zp_text = $self->{zp_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
+    my $zp_field = $self->{zp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    
     my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[100,-1]);
     
     my $btn_xp = $self->{btn_xp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
@@ -176,9 +186,9 @@ sub new {
     my $btn_zp = $self->{btn_zp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
     my $btn_zm = $self->{btn_zm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
     
-    my $sizer_x = Wx::FlexGridSizer->new( 1, 3, 5, 5);
-    my $sizer_y = Wx::FlexGridSizer->new( 1, 3, 5, 5);
-    my $sizer_z = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $sizer_x = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $sizer_y = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $sizer_z = Wx::FlexGridSizer->new( 1, 3, 1, 5);
     
     $sizer_x->Add($self->{x_text}, 1,wxTOP, 0);
     $sizer_x->Add($self->{btn_xm}, 1,wxTOP, 0);
@@ -194,9 +204,9 @@ sub new {
     
     # settings sizer
     my $settings_sizer_main = Wx::StaticBoxSizer->new($self->{staticbox} = Wx::StaticBox->new($self, -1, "Part Settings"),wxVERTICAL);
-    my $settings_sizer_sttings = Wx::FlexGridSizer->new( 6, 2, 5, 5);
-    my $settings_sizer_positions = Wx::FlexGridSizer->new( 9, 3, 5, 5);
-    my $settings_sizer_buttons = Wx::FlexGridSizer->new( 1, 1, 5, 5);
+    my $settings_sizer_sttings = Wx::FlexGridSizer->new( 6, 2, 1, 5);
+    my $settings_sizer_positions = Wx::FlexGridSizer->new( 12, 3, 1, 5);
+    my $settings_sizer_buttons = Wx::FlexGridSizer->new( 1, 1, 1, 5);
     
     $settings_sizer_main->Add($settings_sizer_sttings, 0,wxTOP, 0);
     $settings_sizer_main->Add($settings_sizer_positions, 0,wxTOP, 0);
@@ -242,6 +252,15 @@ sub new {
     $settings_sizer_positions->Add($self->{xs_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{ys_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zs_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{partpos_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xp_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yp_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zp_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{xp_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yp_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zp_field}, 1,wxTOP, 0);    
     
     my $btn_save_part = $self->{btn_save_part} = Wx::Button->new($self, -1, "Save Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     $settings_sizer_buttons->Add($btn_save_part, 0);
@@ -251,7 +270,7 @@ sub new {
     my $btn_save_netlist = $self->{btn_save_netlist} = Wx::Button->new($self, -1, "Save netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # lower buttons sizer
-    my $buttons_sizer_bottom = Wx::FlexGridSizer->new( 1, 3, 5, 5);
+    my $buttons_sizer_bottom = Wx::FlexGridSizer->new( 1, 3, 1, 5);
     $buttons_sizer_bottom->Add($btn_save_netlist, 0);
     $btn_save_netlist->SetFont($Slic3r::GUI::small_font);
     
@@ -418,8 +437,9 @@ sub sliderMoved {
     my $changed = 0;
     
     for my $part (@{$self->{schematic}->{partlist}}) {
-        if (($part->{shown} == 0 && $part->{position}[2]-$part->{height} <= $height) ||
-            ($part->{shown} == 1 && $part->{position}[2]-$part->{height} > $height)) {
+        if (($part->{height} && 
+            ($part->{shown} == 0 && $part->{position}[2]-$part->{height} <= $height) ||
+            ($part->{shown} == 1 && $part->{position}[2]-$part->{height} > $height))) {
             $changed = 1;
         }
     }
@@ -573,7 +593,7 @@ sub displayPart {
             }
         }
         
-        my $chip_model = $part->getChipModel($self->{config});
+        my $chip_model = $part->getPartModel($self->{config});
             
         foreach my $object (@{$chip_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
@@ -798,9 +818,12 @@ sub showPartInfo {
     $self->{xr_field}->SetValue($part->{rotation}[0]) if (defined($part->{rotation}[0]));
     $self->{yr_field}->SetValue($part->{rotation}[1]) if (defined($part->{rotation}[1]));
     $self->{zr_field}->SetValue($part->{rotation}[2]) if (defined($part->{rotation}[2]));
-    $self->{xs_field}->SetValue($part->{chipsize}[0]) if (defined($part->{chipsize}[0]));
-    $self->{ys_field}->SetValue($part->{chipsize}[1]) if (defined($part->{chipsize}[1]));
-    $self->{zs_field}->SetValue($part->{chipsize}[2]) if (defined($part->{chipsize}[2]));
+    $self->{xs_field}->SetValue($part->{partsize}[0]) if (defined($part->{partsize}[0]));
+    $self->{ys_field}->SetValue($part->{partsize}[1]) if (defined($part->{partsize}[1]));
+    $self->{zs_field}->SetValue($part->{partsize}[2]) if (defined($part->{partsize}[2]));
+    $self->{xp_field}->SetValue($part->{partpos}[0]) if (defined($part->{partpos}[0]));
+    $self->{yp_field}->SetValue($part->{partpos}[1]) if (defined($part->{partpos}[1]));
+    $self->{zp_field}->SetValue($part->{partpos}[2]) if (defined($part->{partpos}[2]));
 }
 
 #######################################################################
@@ -826,6 +849,9 @@ sub clearPartInfo {
     $self->{xs_field}->SetValue("");
     $self->{ys_field}->SetValue("");
     $self->{zs_field}->SetValue("");
+    $self->{xp_field}->SetValue("");
+    $self->{yp_field}->SetValue("");
+    $self->{zp_field}->SetValue("");
 }
 
 #######################################################################
@@ -845,7 +871,8 @@ sub savePartInfo {
     $part->{height} = $self->{height_field}->GetValue;
     @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue) if (!($self->{x_field}->GetValue eq "") && !($self->{y_field}->GetValue eq "") && !($self->{z_field}->GetValue eq ""));
     @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue) if (!($self->{xr_field}->GetValue eq "") && !($self->{yr_field}->GetValue eq "") && !($self->{zr_field}->GetValue eq ""));
-    @{$part->{chipsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue) if (!($self->{xs_field}->GetValue eq "") && !($self->{ys_field}->GetValue eq "") && !($self->{zs_field}->GetValue eq ""));
+    @{$part->{partsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue) if (!($self->{xs_field}->GetValue eq "") && !($self->{ys_field}->GetValue eq "") && !($self->{zs_field}->GetValue eq ""));
+    @{$part->{partpos}} = ($self->{xp_field}->GetValue, $self->{yp_field}->GetValue, $self->{zp_field}->GetValue) if (!($self->{xp_field}->GetValue eq "") && !($self->{yp_field}->GetValue eq "") && !($self->{zp_field}->GetValue eq ""));
     $self->displayPart($part);
         
 }

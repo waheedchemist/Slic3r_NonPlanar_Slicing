@@ -33,7 +33,9 @@ sub new {
     
     my @padlist = @{$self->{padlist}} = ();
     
-    my @chipsize = @{$self->{chipsize}} = (undef,undef,undef);
+    my @partpos = @{$self->{partpos}} = (0,0,0);
+    
+    my @partsize = @{$self->{partsize}} = (0,0,0);
 
     return $self;
 }
@@ -77,28 +79,28 @@ sub setRotation {
 }
 
 #######################################################################
-# Purpose    : Sets the chipsize of the part itself
+# Purpose    : Sets the partsize of the part itself
 # Parameters : x, y, z dimensions of the part
 # Returns    : none
 # Commet     : values have to be valid
 #######################################################################
-sub setChipsize {
+sub setPartsize {
     my $self = shift;
     my ($x,$y,$z) = @_;
-    $self->{chipsize} = [$x,$y,$z];
+    $self->{partsize} = [$x,$y,$z];
 }
 
 #######################################################################
-# Purpose    : returns the chipsize of the part
+# Purpose    : returns the partsize of the part
 # Parameters : none
 # Returns    : (x, y, z) dimensions of the part
 # Commet     : when the dimensions are not set,
 #            : they are calculated by the footprint
 #######################################################################
-sub getChipsize {
+sub getPartsize {
     my $self = shift;
     my ($config) = @_;
-    if (!(defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]) && defined($self->{chipsize}[0]))) {
+    if (!(defined($self->{partsize}[0]) && defined($self->{partsize}[0]) && defined($self->{partsize}[0]))) {
         my $xmin = 0;
         my $ymin = 0;
         my $xmax = 0;
@@ -119,11 +121,12 @@ sub getChipsize {
         }
         my $x = $xmax-$xmin+$config->{offset}{chip_x_offset};
         my $y = $ymax-$ymin+$config->{offset}{chip_y_offset};
-        my $z = $self->getChipheight($config)+$config->{offset}{chip_z_offset};
-        @{$self->{chipsize}} = ($x,$y,$z);
+        my $z = $self->getPartheight($config)+$config->{offset}{chip_z_offset};
+        @{$self->{partsize}} = ($x,$y,$z);
+        @{$self->{partpos}} = (($xmax-abs($xmin))/2,($ymax-abs($ymin))/2,0);
     }
     
-    return @{$self->{chipsize}};
+    return @{$self->{partsize}};
 }
 
 #######################################################################
@@ -132,7 +135,7 @@ sub getChipsize {
 # Returns    : height of chip
 # Commet     : 
 #######################################################################
-sub getChipheight {
+sub getPartheight {
     my $self = shift;
     my ($config) = @_;
     if ($config->{chip_height}{$self->{package}}) {
@@ -140,6 +143,18 @@ sub getChipheight {
     } else {
         return $config->{chip_height}{default};
     }
+}
+
+#######################################################################
+# Purpose    : Sets the Partposition of the part itself
+# Parameters : x, y, z coordinates of the part
+# Returns    : none
+# Commet     : values have to be valid
+#######################################################################
+sub setPartpos {
+    my $self = shift;
+    my ($x,$y,$z) = @_;
+    $self->{partpos} = [$x,$y,$z];
 }
 
 #######################################################################
@@ -176,16 +191,16 @@ sub getFootprintModel {
 }
 
 #######################################################################
-# Purpose    : Gives a model of the parts chip
+# Purpose    : Gives a model of the parts
 # Parameters : none
-# Returns    : Chip model
+# Returns    : Part model
 # Commet     : The model is translated and rotated
 #######################################################################
-sub getChipModel {
+sub getPartModel {
     my $self = shift;
     my ($config) = @_;
     my @triangles = ();
-    push @triangles, Slic3r::Electronics::Geometrics->getCube((0,0,0), $self->getChipsize($config));
+    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{partpos}}, $self->getPartsize($config));
     my $model = $self->getTriangleMesh(@triangles);
     return $model;
 }
