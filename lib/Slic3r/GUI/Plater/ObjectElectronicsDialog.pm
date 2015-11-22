@@ -86,13 +86,13 @@ sub new {
     my $btn_load_netlist = $self->{btn_load_netlist} = Wx::Button->new($self, -1, "Load netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # upper buttons sizer
-    my $buttons_sizer = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $buttons_sizer = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer->Add($btn_load_netlist, 0);
     $btn_load_netlist->SetFont($Slic3r::GUI::small_font);
     
     
     # create TreeCtrl
-    my $tree = $self->{tree} = Wx::TreeCtrl->new($self, -1, wxDefaultPosition, [300,-1], 
+    my $tree = $self->{tree} = Wx::TreeCtrl->new($self, -1, wxDefaultPosition, [350,-1], 
         wxTR_NO_BUTTONS | wxSUNKEN_BORDER | wxTR_HAS_VARIABLE_ROW_HEIGHT
         | wxTR_SINGLE | wxTR_NO_BUTTONS | wxEXPAND);
     {
@@ -112,105 +112,106 @@ sub new {
     my $btn_remove_part = $self->{btn_remove_part} = Wx::Button->new($self, -1, "Remove Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # mid buttons sizer
-    my $buttons_sizer_mid = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $buttons_sizer_mid = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer_mid->Add($btn_place_part, 0);
     $buttons_sizer_mid->Add($btn_remove_part, 0);
     $btn_place_part->SetFont($Slic3r::GUI::small_font);
     $btn_remove_part->SetFont($Slic3r::GUI::small_font);
     
     # part settings fields
-    my $name_text = $self->{name_text} = Wx::StaticText->new($self, -1, "Name:",wxDefaultPosition,[100,-1]);
-    my $name_field = $self->{name_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition, [200,-1]);
+    my $name_text = $self->{name_text} = Wx::StaticText->new($self, -1, "Name:",wxDefaultPosition,[105,-1]);
+    my $name_field = $self->{name_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition, [230,-1]);
     
-    my $library_text = $self->{library_text} = Wx::StaticText->new($self, -1, "Library:",wxDefaultPosition,[100,-1]);
-    my $library_field = $self->{library_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
+    my $library_text = $self->{library_text} = Wx::StaticText->new($self, -1, "Library:",wxDefaultPosition,[105,-1]);
+    my $library_field = $self->{library_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [230,-1]);
     
-    my $deviceset_text = $self->{deviceset_text} = Wx::StaticText->new($self, -1, "Deviceset:",wxDefaultPosition,[100,-1]);
-    my $deviceset_field = $self->{deviceset_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
+    my $deviceset_text = $self->{deviceset_text} = Wx::StaticText->new($self, -1, "Deviceset:",wxDefaultPosition,[105,-1]);
+    my $deviceset_field = $self->{deviceset_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [230,-1]);
     
-    my $device_text = $self->{device_text} = Wx::StaticText->new($self, -1, "Device:",wxDefaultPosition,[100,-1]);
-    my $device_field = $self->{device_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
+    my $device_text = $self->{device_text} = Wx::StaticText->new($self, -1, "Device:",wxDefaultPosition,[105,-1]);
+    my $device_field = $self->{device_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [230,-1]);
     
-    my $package_text = $self->{package_text} = Wx::StaticText->new($self, -1, "Package:",wxDefaultPosition,[100,-1]);
-    my $package_field = $self->{package_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
+    my $package_text = $self->{package_text} = Wx::StaticText->new($self, -1, "Package:",wxDefaultPosition,[105,-1]);
+    my $package_field = $self->{package_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [230,-1]);
     
     my $height_text = $self->{height_text} = Wx::StaticText->new($self, -1, "Layer height:",wxDefaultPosition,[100,-1]);
-    my $height_field = $self->{height_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [200,-1]);
+    my $height_field = $self->{height_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [230,-1]);
     
-    my $position_text = $self->{position_text} = Wx::StaticText->new($self, -1, "Position:",wxDefaultPosition,[100,-1]);
-    my $x_text = $self->{x_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[25,-1]);
-    my $x_field = $self->{x_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $position_text = $self->{position_text} = Wx::StaticText->new($self, -1, "Position:",wxDefaultPosition,[85,-1]);
+    my $x_text = $self->{x_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
+    my $x_field = $self->{x_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $y_text = $self->{y_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[25,-1]);
-    my $y_field = $self->{y_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $y_text = $self->{y_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[15,-1]);
+    my $y_field = $self->{y_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $z_text = $self->{z_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[25,-1]);
-    my $z_field = $self->{z_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $z_text = $self->{z_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
+    my $z_field = $self->{z_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $rotation_text = $self->{rotation_text} = Wx::StaticText->new($self, -1, "Rotation:",wxDefaultPosition,[100,-1]);
-    my $xr_text = $self->{xr_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
-    my $xr_field = $self->{xr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $rotation_text = $self->{rotation_text} = Wx::StaticText->new($self, -1, "Rotation:",wxDefaultPosition,[85,-1]);
+    my $xr_text = $self->{xr_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
+    my $xr_field = $self->{xr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $yr_text = $self->{yr_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
-    my $yr_field = $self->{yr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $yr_text = $self->{yr_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[15,-1]);
+    my $yr_field = $self->{yr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
-    my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
+    my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $partsize_text = $self->{partsize_text} = Wx::StaticText->new($self, -1, "Partsize:",wxDefaultPosition,[100,-1]);
-    my $xs_text = $self->{xs_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
-    my $xs_field = $self->{xs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $partsize_text = $self->{partsize_text} = Wx::StaticText->new($self, -1, "Partsize:",wxDefaultPosition,[85,-1]);
+    my $xs_text = $self->{xs_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
+    my $xs_field = $self->{xs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $ys_text = $self->{ys_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
-    my $ys_field = $self->{ys_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $ys_text = $self->{ys_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[15,-1]);
+    my $ys_field = $self->{ys_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $zs_text = $self->{zs_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
-    my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $zs_text = $self->{zs_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
+    my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $partpos_text = $self->{partpos_text} = Wx::StaticText->new($self, -1, "Part position:",wxDefaultPosition,[100,-1]);
-    my $xp_text = $self->{xp_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[100,-1]);
-    my $xp_field = $self->{xp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $partpos_text = $self->{partpos_text} = Wx::StaticText->new($self, -1, "Part position:",wxDefaultPosition,[85,-1]);
+    my $xp_text = $self->{xp_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
+    my $xp_field = $self->{xp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $yp_text = $self->{yp_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[100,-1]);
-    my $yp_field = $self->{yp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $yp_text = $self->{yp_text} = Wx::StaticText->new($self, -1, "Y:",wxDefaultPosition,[15,-1]);
+    my $yp_field = $self->{yp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $zp_text = $self->{zp_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[100,-1]);
-    my $zp_field = $self->{zp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [100,-1]);
+    my $zp_text = $self->{zp_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
+    my $zp_field = $self->{zp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[100,-1]);
+    my $empty_text = $self->{empty_text} = Wx::StaticText->new($self, -1, "",wxDefaultPosition,[15,-1]);
     
-    my $btn_xp = $self->{btn_xp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
-    my $btn_xm = $self->{btn_xm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
-    my $btn_yp = $self->{btn_yp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
-    my $btn_ym = $self->{btn_ym} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
-    my $btn_zp = $self->{btn_zp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [25,-1], wxBU_LEFT);
-    my $btn_zm = $self->{btn_zm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [25,-1], wxBU_LEFT);
+    my $btn_xp = $self->{btn_xp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [20,20], wxBU_LEFT);
+    my $btn_xm = $self->{btn_xm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [20,20], wxBU_LEFT);
+    my $btn_yp = $self->{btn_yp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [20,20], wxBU_LEFT);
+    my $btn_ym = $self->{btn_ym} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [20,20], wxBU_LEFT);
+    my $btn_zp = $self->{btn_zp} = Wx::Button->new($self, -1, "+", wxDefaultPosition, [20,20], wxBU_LEFT);
+    my $btn_zm = $self->{btn_zm} = Wx::Button->new($self, -1, "-", wxDefaultPosition, [20,20], wxBU_LEFT);
     
-    my $sizer_x = Wx::FlexGridSizer->new( 1, 3, 1, 5);
-    my $sizer_y = Wx::FlexGridSizer->new( 1, 3, 1, 5);
-    my $sizer_z = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $sizer_x = Wx::FlexGridSizer->new( 1, 2, 5, 5);
+    my $sizer_y = Wx::FlexGridSizer->new( 1, 2, 5, 5);
+    my $sizer_z = Wx::FlexGridSizer->new( 1, 2, 5, 5);
     
-    $sizer_x->Add($self->{x_text}, 1,wxTOP, 0);
+    
     $sizer_x->Add($self->{btn_xm}, 1,wxTOP, 0);
     $sizer_x->Add($self->{btn_xp}, 1,wxTOP, 0);
-    
-    $sizer_y->Add($self->{y_text}, 1,wxTOP, 0);
+
     $sizer_y->Add($self->{btn_ym}, 1,wxTOP, 0);
     $sizer_y->Add($self->{btn_yp}, 1,wxTOP, 0);
-    
-    $sizer_z->Add($self->{z_text}, 1,wxTOP, 0);
+
     $sizer_z->Add($self->{btn_zm}, 1,wxTOP, 0);
     $sizer_z->Add($self->{btn_zp}, 1,wxTOP, 0);
     
     # settings sizer
     my $settings_sizer_main = Wx::StaticBoxSizer->new($self->{staticbox} = Wx::StaticBox->new($self, -1, "Part Settings"),wxVERTICAL);
-    my $settings_sizer_sttings = Wx::FlexGridSizer->new( 6, 2, 1, 5);
-    my $settings_sizer_positions = Wx::FlexGridSizer->new( 12, 3, 1, 5);
-    my $settings_sizer_buttons = Wx::FlexGridSizer->new( 1, 1, 1, 5);
+    my $settings_sizer_main_grid = Wx::FlexGridSizer->new( 3, 1, 5, 5);
+    my $settings_sizer_sttings = Wx::FlexGridSizer->new( 6, 2, 5, 5);
+    my $settings_sizer_positions = Wx::FlexGridSizer->new( 5, 7, 5, 5);
+    my $settings_sizer_buttons = Wx::FlexGridSizer->new( 1, 1, 5, 5);
     
-    $settings_sizer_main->Add($settings_sizer_sttings, 0,wxTOP, 0);
-    $settings_sizer_main->Add($settings_sizer_positions, 0,wxTOP, 0);
-    $settings_sizer_main->Add($settings_sizer_buttons, 0,wxTOP, 0);
+    $settings_sizer_main->Add($settings_sizer_main_grid, 0,wxTOP, 0);
+    
+    $settings_sizer_main_grid->Add($settings_sizer_sttings, 0,wxTOP, 0);
+    $settings_sizer_main_grid->Add($settings_sizer_positions, 0,wxTOP, 0);
+    $settings_sizer_main_grid->Add($settings_sizer_buttons, 0,wxTOP, 0);
     
     $settings_sizer_sttings->Add($self->{name_text}, 1,wxTOP, 0);
     $settings_sizer_sttings->Add($self->{name_field}, 1,wxTOP, 0);
@@ -226,40 +227,44 @@ sub new {
     $settings_sizer_sttings->Add($self->{height_field}, 1,wxTOP, 0);
     
     $settings_sizer_positions->Add($self->{position_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{x_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{x_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{y_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{y_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{z_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{z_field}, 1,wxTOP, 0);
+    
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($sizer_x, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($sizer_y, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($sizer_z, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{x_field}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{y_field}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{z_field}, 1,wxTOP, 0);
+    
     $settings_sizer_positions->Add($self->{rotation_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xr_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{yr_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{zr_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xr_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yr_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{yr_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zr_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zr_field}, 1,wxTOP, 0);
+    
+    
     $settings_sizer_positions->Add($self->{partsize_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xs_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{ys_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{zs_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xs_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{ys_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{ys_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zs_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zs_field}, 1,wxTOP, 0);
+    
     $settings_sizer_positions->Add($self->{partpos_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{empty_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xp_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{yp_text}, 1,wxTOP, 0);
-    $settings_sizer_positions->Add($self->{zp_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xp_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{yp_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{yp_field}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{zp_text}, 1,wxTOP, 0); 
     $settings_sizer_positions->Add($self->{zp_field}, 1,wxTOP, 0);    
     
     my $btn_save_part = $self->{btn_save_part} = Wx::Button->new($self, -1, "Save Part", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
@@ -270,7 +275,7 @@ sub new {
     my $btn_save_netlist = $self->{btn_save_netlist} = Wx::Button->new($self, -1, "Save netlist", wxDefaultPosition, wxDefaultSize, wxBU_LEFT);
     
     # lower buttons sizer
-    my $buttons_sizer_bottom = Wx::FlexGridSizer->new( 1, 3, 1, 5);
+    my $buttons_sizer_bottom = Wx::FlexGridSizer->new( 1, 3, 5, 5);
     $buttons_sizer_bottom->Add($btn_save_netlist, 0);
     $btn_save_netlist->SetFont($Slic3r::GUI::small_font);
     
