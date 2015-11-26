@@ -393,7 +393,7 @@ sub new {
     });
     
     EVT_BUTTON($self, $self->{btn_ym}, sub { 
-        $self->movePart(0,-$self->{config}->{_}{move_step}*-1,0);
+        $self->movePart(0,$self->{config}->{_}{move_step}*-1,0);
     });
     
     EVT_BUTTON($self, $self->{btn_zp}, sub { 
