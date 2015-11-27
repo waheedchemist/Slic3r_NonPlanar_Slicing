@@ -157,7 +157,7 @@ sub new {
     my $zr_text = $self->{zr_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
     my $zr_field = $self->{zr_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $partsize_text = $self->{partsize_text} = Wx::StaticText->new($self, -1, "Partsize:",wxDefaultPosition,[85,-1]);
+    my $componentsize_text = $self->{componentsize_text} = Wx::StaticText->new($self, -1, "Component size:",wxDefaultPosition,[85,-1]);
     my $xs_text = $self->{xs_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
     my $xs_field = $self->{xs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
@@ -167,7 +167,7 @@ sub new {
     my $zs_text = $self->{zs_text} = Wx::StaticText->new($self, -1, "Z:",wxDefaultPosition,[15,-1]);
     my $zs_field = $self->{zs_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
-    my $partpos_text = $self->{partpos_text} = Wx::StaticText->new($self, -1, "Part position:",wxDefaultPosition,[85,-1]);
+    my $componentpos_text = $self->{componentpos_text} = Wx::StaticText->new($self, -1, "Component position:",wxDefaultPosition,[85,-1]);
     my $xp_text = $self->{xp_text} = Wx::StaticText->new($self, -1, "X:",wxDefaultPosition,[15,-1]);
     my $xp_field = $self->{xp_field} = Wx::TextCtrl->new($self, -1, "",wxDefaultPosition,  [60,-1]);
     
@@ -251,7 +251,7 @@ sub new {
     $settings_sizer_positions->Add($self->{zr_field}, 1,wxTOP, 0);
     
     
-    $settings_sizer_positions->Add($self->{partsize_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{componentsize_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xs_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xs_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{ys_text}, 1,wxTOP, 0);
@@ -259,7 +259,7 @@ sub new {
     $settings_sizer_positions->Add($self->{zs_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{zs_field}, 1,wxTOP, 0);
     
-    $settings_sizer_positions->Add($self->{partpos_text}, 1,wxTOP, 0);
+    $settings_sizer_positions->Add($self->{componentpos_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xp_text}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{xp_field}, 1,wxTOP, 0);
     $settings_sizer_positions->Add($self->{yp_text}, 1,wxTOP, 0);
@@ -823,12 +823,12 @@ sub showPartInfo {
     $self->{xr_field}->SetValue($part->{rotation}[0]) if (defined($part->{rotation}[0]));
     $self->{yr_field}->SetValue($part->{rotation}[1]) if (defined($part->{rotation}[1]));
     $self->{zr_field}->SetValue($part->{rotation}[2]) if (defined($part->{rotation}[2]));
-    $self->{xs_field}->SetValue($part->{partsize}[0]) if (defined($part->{partsize}[0]));
-    $self->{ys_field}->SetValue($part->{partsize}[1]) if (defined($part->{partsize}[1]));
-    $self->{zs_field}->SetValue($part->{partsize}[2]) if (defined($part->{partsize}[2]));
-    $self->{xp_field}->SetValue($part->{partpos}[0]) if (defined($part->{partpos}[0]));
-    $self->{yp_field}->SetValue($part->{partpos}[1]) if (defined($part->{partpos}[1]));
-    $self->{zp_field}->SetValue($part->{partpos}[2]) if (defined($part->{partpos}[2]));
+    $self->{xs_field}->SetValue($part->{componentsize}[0]) if (defined($part->{componentsize}[0]));
+    $self->{ys_field}->SetValue($part->{componentsize}[1]) if (defined($part->{componentsize}[1]));
+    $self->{zs_field}->SetValue($part->{componentsize}[2]) if (defined($part->{componentsize}[2]));
+    $self->{xp_field}->SetValue($part->{componentpos}[0]) if (defined($part->{componentpos}[0]));
+    $self->{yp_field}->SetValue($part->{componentpos}[1]) if (defined($part->{componentpos}[1]));
+    $self->{zp_field}->SetValue($part->{componentpos}[2]) if (defined($part->{componentpos}[2]));
 }
 
 #######################################################################
@@ -876,8 +876,8 @@ sub savePartInfo {
     $part->{height} = $self->{height_field}->GetValue;
     @{$part->{position}} = ($self->{x_field}->GetValue, $self->{y_field}->GetValue, $self->{z_field}->GetValue) if (!($self->{x_field}->GetValue eq "") && !($self->{y_field}->GetValue eq "") && !($self->{z_field}->GetValue eq ""));
     @{$part->{rotation}} = ($self->{xr_field}->GetValue, $self->{yr_field}->GetValue, $self->{zr_field}->GetValue) if (!($self->{xr_field}->GetValue eq "") && !($self->{yr_field}->GetValue eq "") && !($self->{zr_field}->GetValue eq ""));
-    @{$part->{partsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue) if (!($self->{xs_field}->GetValue eq "") && !($self->{ys_field}->GetValue eq "") && !($self->{zs_field}->GetValue eq ""));
-    @{$part->{partpos}} = ($self->{xp_field}->GetValue, $self->{yp_field}->GetValue, $self->{zp_field}->GetValue) if (!($self->{xp_field}->GetValue eq "") && !($self->{yp_field}->GetValue eq "") && !($self->{zp_field}->GetValue eq ""));
+    @{$part->{componentsize}} = ($self->{xs_field}->GetValue, $self->{ys_field}->GetValue, $self->{zs_field}->GetValue) if (!($self->{xs_field}->GetValue eq "") && !($self->{ys_field}->GetValue eq "") && !($self->{zs_field}->GetValue eq ""));
+    @{$part->{componentpos}} = ($self->{xp_field}->GetValue, $self->{yp_field}->GetValue, $self->{zp_field}->GetValue) if (!($self->{xp_field}->GetValue eq "") && !($self->{yp_field}->GetValue eq "") && !($self->{zp_field}->GetValue eq ""));
     $self->displayPart($part);
         
 }

@@ -33,9 +33,9 @@ sub new {
     
     my @padlist = @{$self->{padlist}} = ();
     
-    my @partpos = @{$self->{partpos}} = (0,0,0);
+    my @componentpos = @{$self->{componentpos}} = (0,0,0);
     
-    my @partsize = @{$self->{partsize}} = (0,0,0);
+    my @componentsize = @{$self->{componentsize}} = (0,0,0);
 
     return $self;
 }
@@ -79,7 +79,7 @@ sub setRotation {
 }
 
 #######################################################################
-# Purpose    : Sets the partsize of the part itself
+# Purpose    : Sets the componentsize of the part itself
 # Parameters : x, y, z dimensions of the part
 # Returns    : none
 # Commet     : values have to be valid
@@ -87,11 +87,11 @@ sub setRotation {
 sub setPartsize {
     my $self = shift;
     my ($x,$y,$z) = @_;
-    $self->{partsize} = [$x,$y,$z];
+    $self->{componentsize} = [$x,$y,$z];
 }
 
 #######################################################################
-# Purpose    : returns the partsize of the part
+# Purpose    : returns the componentsize of the part
 # Parameters : none
 # Returns    : (x, y, z) dimensions of the part
 # Commet     : when the dimensions are not set,
@@ -100,7 +100,7 @@ sub setPartsize {
 sub getPartsize {
     my $self = shift;
     my ($config) = @_;
-    if (!(defined($self->{partsize}[0]) && defined($self->{partsize}[0]) && defined($self->{partsize}[0]))) {
+    if (!(defined($self->{componentsize}[0]) && defined($self->{componentsize}[0]) && defined($self->{componentsize}[0]))) {
         my $xmin = 0;
         my $ymin = 0;
         my $xmax = 0;
@@ -122,11 +122,11 @@ sub getPartsize {
         my $x = $xmax-$xmin+$config->{offset}{chip_x_offset};
         my $y = $ymax-$ymin+$config->{offset}{chip_y_offset};
         my $z = $self->getPartheight($config)+$config->{offset}{chip_z_offset};
-        @{$self->{partsize}} = ($x,$y,$z);
-        @{$self->{partpos}} = (($xmax-abs($xmin))/2,($ymax-abs($ymin))/2,0);
+        @{$self->{componentsize}} = ($x,$y,$z);
+        @{$self->{componentpos}} = (($xmax-abs($xmin))/2,($ymax-abs($ymin))/2,0);
     }
     
-    return @{$self->{partsize}};
+    return @{$self->{componentsize}};
 }
 
 #######################################################################
@@ -154,7 +154,7 @@ sub getPartheight {
 sub setPartpos {
     my $self = shift;
     my ($x,$y,$z) = @_;
-    $self->{partpos} = [$x,$y,$z];
+    $self->{componentpos} = [$x,$y,$z];
 }
 
 #######################################################################
@@ -200,7 +200,7 @@ sub getPartModel {
     my $self = shift;
     my ($config) = @_;
     my @triangles = ();
-    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{partpos}}, $self->getPartsize($config));
+    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config));
     my $model = $self->getTriangleMesh(@triangles);
     return $model;
 }

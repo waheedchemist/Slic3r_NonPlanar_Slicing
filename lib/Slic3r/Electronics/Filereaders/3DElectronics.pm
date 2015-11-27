@@ -34,8 +34,8 @@ sub readFile {
         my $height = undef;
         my @position = undef;
         my @rotation = undef;
-        my @partpos = undef;
-        my @partsize = undef;
+        my @componentpos = undef;
+        my @componentsize = undef;
         for my $h ($node->findnodes('./attributes')) {
             $height = $h->getAttribute('height');
         }
@@ -45,11 +45,11 @@ sub readFile {
         for my $rot ($node->findnodes('./rotation')) {
             @rotation = ($rot->getAttribute('X'),$rot->getAttribute('Y'),$rot->getAttribute('Z'));
         }
-        for my $chip ($node->findnodes('./partsize')) {
-            @partsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
+        for my $chip ($node->findnodes('./componentsize')) {
+            @componentsize = ($chip->getAttribute('X'),$chip->getAttribute('Y'),$chip->getAttribute('Z'));
         }
-        for my $partpos ($node->findnodes('./partpos')) {
-            @partpos = ($partpos->getAttribute('X'),$partpos->getAttribute('Y'),$partpos->getAttribute('Z'));
+        for my $componentpos ($node->findnodes('./componentpos')) {
+            @componentpos = ($componentpos->getAttribute('X'),$componentpos->getAttribute('Y'),$componentpos->getAttribute('Z'));
         }
         for my $part (@{$schematic->{partlist}}) {
             if (($part->{name} eq $name) && 
@@ -60,8 +60,8 @@ sub readFile {
                 $part->{height} = $height;
                 @{$part->{position}} = @position;
                 @{$part->{rotation}} = @rotation;
-                @{$part->{partsize}} = @partsize;
-                @{$part->{partpos}} = @partpos;
+                @{$part->{componentsize}} = @componentsize;
+                @{$part->{componentpos}} = @componentpos;
             }
         }
     }
@@ -80,7 +80,7 @@ sub writeFile {
     my ($schematic) = @_;
     my $dom = XML::LibXML::Document->createDocument('1.0','utf-8');
     my $root = $dom->createElement('electronics');
-    $root->addChild($dom->createAttribute( version => '1.0'));
+    $root->addChild($dom->createAttribute( version => '1.1'));
     $dom->setDocumentElement($root);
 
     my $file = $dom->createElement('filename');
@@ -115,17 +115,17 @@ sub writeFile {
             $rot->addChild($dom->createAttribute( Y => $part->{rotation}[1]));
             $rot->addChild($dom->createAttribute( Z => $part->{rotation}[2]));
             
-            my $chip = $dom->createElement('partsize');
+            my $chip = $dom->createElement('componentsize');
             $node->addChild($chip);
-            $chip->addChild($dom->createAttribute( X => $part->{partsize}[0]));
-            $chip->addChild($dom->createAttribute( Y => $part->{partsize}[1]));
-            $chip->addChild($dom->createAttribute( Z => $part->{partsize}[2]));
+            $chip->addChild($dom->createAttribute( X => $part->{componentsize}[0]));
+            $chip->addChild($dom->createAttribute( Y => $part->{componentsize}[1]));
+            $chip->addChild($dom->createAttribute( Z => $part->{componentsize}[2]));
             
-            my $partpos = $dom->createElement('partpos');
-            $node->addChild($partpos);
-            $partpos->addChild($dom->createAttribute( X => $part->{partpos}[0]));
-            $partpos->addChild($dom->createAttribute( Y => $part->{partpos}[1]));
-            $partpos->addChild($dom->createAttribute( Z => $part->{partpos}[2]));
+            my $componentpos = $dom->createElement('componentpos');
+            $node->addChild($componentpos);
+            $componentpos->addChild($dom->createAttribute( X => $part->{componentpos}[0]));
+            $componentpos->addChild($dom->createAttribute( Y => $part->{componentpos}[1]));
+            $componentpos->addChild($dom->createAttribute( Z => $part->{componentpos}[2]));
         }
     }
     my ($base,$path,$type) = fileparse($schematic->{filename},('.sch','.SCH','3de','.3DE'));
