@@ -1,11 +1,23 @@
 #include "Config.hpp"
 #include <stdlib.h>  // for setenv()
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(setenv) && defined(_putenv_s)
 #define setenv(k, v, o) _putenv_s(k, v)
 #endif
 
 namespace Slic3r {
+
+bool
+operator== (const ConfigOption &a, const ConfigOption &b)
+{
+    return a.serialize().compare(b.serialize()) == 0;
+}
+
+bool
+operator!= (const ConfigOption &a, const ConfigOption &b)
+{
+    return !(a == b);
+}
 
 bool
 ConfigBase::has(const t_config_option_key &opt_key) {
@@ -52,8 +64,8 @@ ConfigBase::diff(ConfigBase &other) {
 }
 
 std::string
-ConfigBase::serialize(const t_config_option_key &opt_key) {
-    ConfigOption* opt = this->option(opt_key);
+ConfigBase::serialize(const t_config_option_key &opt_key) const {
+    const ConfigOption* opt = this->option(opt_key);
     assert(opt != NULL);
     return opt->serialize();
 }
@@ -104,6 +116,7 @@ ConfigBase::get_abs_value(const t_config_option_key &opt_key, double ratio_over)
 void
 ConfigBase::setenv_()
 {
+#ifdef setenv
     t_config_option_keys opt_keys = this->keys();
     for (t_config_option_keys::const_iterator it = opt_keys.begin(); it != opt_keys.end(); ++it) {
         // prepend the SLIC3R_ prefix
@@ -118,6 +131,7 @@ ConfigBase::setenv_()
         
         setenv(envname.c_str(), this->serialize(*it).c_str(), 1);
     }
+#endif
 }
 
 #ifdef SLIC3RXS

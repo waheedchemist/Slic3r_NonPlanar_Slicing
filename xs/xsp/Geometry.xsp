@@ -8,8 +8,8 @@
 
 %package{Slic3r::Geometry};
 
-Pointfs arrange(size_t total_parts, Pointf* part, coordf_t dist, BoundingBoxf* bb)
-    %code{% RETVAL = Slic3r::Geometry::arrange(total_parts, *part, dist, *bb); %};
+Pointfs arrange(size_t total_parts, Pointf* part, coordf_t dist, BoundingBoxf* bb = NULL)
+    %code{% RETVAL = Slic3r::Geometry::arrange(total_parts, *part, dist, bb); %};
 
 %{
 

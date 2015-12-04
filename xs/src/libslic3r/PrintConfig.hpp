@@ -576,6 +576,8 @@ class PrintConfig : public GCodeConfig
         
         return NULL;
     };
+    
+    double min_object_distance() const;
 };
 
 class HostConfig : public virtual StaticPrintConfig
@@ -583,15 +585,21 @@ class HostConfig : public virtual StaticPrintConfig
     public:
     ConfigOptionString              octoprint_host;
     ConfigOptionString              octoprint_apikey;
+    ConfigOptionString              serial_port;
+    ConfigOptionInt                 serial_speed;
     
     HostConfig() : StaticPrintConfig() {
         this->octoprint_host.value                              = "";
         this->octoprint_apikey.value                            = "";
+        this->serial_port.value                                 = "";
+        this->serial_speed.value                                = 250000;
     };
     
     ConfigOption* option(const t_config_option_key &opt_key, bool create = false) {
         OPT_PTR(octoprint_host);
         OPT_PTR(octoprint_apikey);
+        OPT_PTR(serial_port);
+        OPT_PTR(serial_speed);
         
         return NULL;
     };
