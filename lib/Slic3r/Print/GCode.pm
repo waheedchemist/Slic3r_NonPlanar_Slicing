@@ -304,6 +304,12 @@ sub export {
         $self->flush_filters;
     }
     
+    my $id = 1;
+    foreach my $part (@{$schematic->{partlist}}) {
+        print $fh $part->getPlaceGcode(~0, $id);
+        $id += 1;
+    }
+    
     # write end commands to file
     print $fh $gcodegen->retract;   # TODO: process this retract through PressureRegulator in order to discharge fully
     print $fh $gcodegen->writer->set_fan(0);
