@@ -1133,7 +1133,7 @@ sub export_gcode {
     } else {
         eval {
             $self->{print}->process;
-            $self->{print}->export_gcode(output_file => $self->{export_gcode_output_file});
+            $self->{print}->export_gcode(output_file => $self->{export_gcode_output_file}, schematic => $self->{schematic});
         };
         my $result = !Slic3r::GUI::catch_error($self);
         $self->on_export_completed($result);
@@ -1176,7 +1176,7 @@ sub on_process_completed {
         
         $self->{export_thread} = Slic3r::spawn_thread(sub {
             eval {
-                $_thread_self->{print}->export_gcode(output_file => $_thread_self->{export_gcode_output_file});
+                $_thread_self->{print}->export_gcode(output_file => $_thread_self->{export_gcode_output_file}, schematic => $self->{schematic});
             };
             if ($@) {
                 Wx::PostEvent($_thread_self, Wx::PlThreadEvent->new(-1, $ERROR_EVENT, shared_clone([ $@ ])));

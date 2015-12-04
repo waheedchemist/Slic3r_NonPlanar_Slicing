@@ -177,6 +177,7 @@ sub addPad {
 #######################################################################
 sub getFootprintModel {
     my $self = shift;
+    my ($rot) = @_;
     my @triangles = ();
     for my $pad (@{$self->{padlist}}) {
         if ($pad->{type} eq 'smd') {
@@ -186,7 +187,7 @@ sub getFootprintModel {
             push @triangles, Slic3r::Electronics::Geometrics->getCylinder(@{$pad->{position}}, $pad->{drill}/2+0.25, $self->{height}*(-1));
         }
     }
-    my $model = $self->getTriangleMesh(@triangles);
+    my $model = $self->getTriangleMesh($rot, @triangles);
     return $model;
 }
 
@@ -198,10 +199,10 @@ sub getFootprintModel {
 #######################################################################
 sub getPartModel {
     my $self = shift;
-    my ($config) = @_;
+    my ($config, $rot) = @_;
     my @triangles = ();
     push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config));
-    my $model = $self->getTriangleMesh(@triangles);
+    my $model = $self->getTriangleMesh($rot, @triangles);
     return $model;
 }
 
@@ -213,7 +214,7 @@ sub getPartModel {
 #######################################################################
 sub getTriangleMesh {
     my $self = shift;
-    my (@triangles) = @_;
+    my ($rot, @triangles) = @_;
     my $vertices = $self->{vertices} = [];
     my $facets = $self->{facets} = [];
     for my $triangle (@triangles) {
@@ -230,7 +231,7 @@ sub getTriangleMesh {
     $mesh->rotate_x(deg2rad($self->{rotation}[0])) if ($self->{rotation}[0] != 0);
     $mesh->rotate_y(deg2rad($self->{rotation}[1])) if ($self->{rotation}[1] != 0);
     $mesh->rotate_z(deg2rad($self->{rotation}[2])) if ($self->{rotation}[2] != 0);
-    $mesh->translate(@{$self->{position}});
+    $mesh->translate($self->transformWorldtoObject($rot,(0,0,0)));
     
     
     my $model = Slic3r::Model->new;
@@ -259,6 +260,93 @@ sub getVertexID {
     }
     push (@{$self->{vertices}}, [@vertex]);
     return $id;
+}
+
+#######################################################################
+# Purpose    : Transforms world coodrdinates to object coordinates
+# Parameters : world coordinates and rotation in rad
+# Returns    : transformed coordinates
+# Commet     : does not transform z axis
+#######################################################################
+sub transformWorldtoObject {
+    my $self = shift;
+    my ($rot,@trans) = @_;
+    my @pos = ($self->{position}[0]-$trans[0],$self->{position}[1]-$trans[1],$self->{position}[2]);
+    if ($rot != 0){
+        @pos = ($pos[0]*cos($rot)+$pos[1]*sin($rot),$pos[0]*(-sin($rot))+$pos[1]*cos($rot),$pos[2]);
+    }
+    
+    @pos = (int($pos[0]*1000)/1000.0,int($pos[1]*1000)/1000.0,$pos[2]);
+
+    return @pos;
+}
+
+#######################################################################
+# Purpose    : Transforms object coodrdinates to world coordinates
+# Parameters : world coordinates and rotation in rad
+# Returns    : transformed coordinates
+# Commet     : does not transform z axis
+#######################################################################
+sub transformObjecttoWorld {
+    my $self = shift;
+    my ($rot,@trans) = @_;
+    my @pos = ($self->{position}[0]+$trans[0],$self->{position}[1]+$trans[1],$self->{position}[2]);
+    if ($rot != 0){
+        @pos = ($pos[0]*cos($rot)+$pos[1]*sin($rot),$pos[0]*(-sin($rot))+$pos[1]*cos($rot),$pos[2]);
+    }
+    @pos = (int($pos[0]*1000)/1000.0,int($pos[1]*1000)/1000.0,$pos[2]);
+
+    return @pos;
+}
+
+#######################################################################
+# Purpose    : Returns the G-code for the placement
+# Parameters : actual layer and $id of the part
+# Returns    : G-code or ""
+# Commet     : If part should not be placed now, return ""
+#######################################################################
+sub getPlaceGcode {
+    my $self = shift;
+    my ($printz, $id) = @_;
+    my $gcode = "";
+    if ($self->{position}[2] == $printz){
+        $gcode .= ";pick part nr " . $id . "\n";
+        $gcode .= "M361 P" . $id . "\n";
+    }
+    return $gcode;
+}
+
+#######################################################################
+# Purpose    : Returns the description for the placement
+# Parameters : $id of the part
+# Returns    : description 
+# Commet     : 
+#######################################################################
+sub getPlaceDescription {
+    my $self = shift;
+    my ($id,@offset) = @_;
+    my @newpos = $self->transformObjecttoWorld(0,@offset);
+    my $gcode = "";
+    
+    $gcode .= ';<part id="' . $id . '" name="' . $self->{name} . '">' . "\n";
+    $gcode .= ';  <position box="'.$id.'"/>' . "\n";
+    $gcode .= ';  <size height="'.$self->{componentsize}[2].'"/>' . "\n";
+    $gcode .= ';  <shape>' . "\n";
+    $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
+    $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
+    $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
+    $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
+    $gcode .= ';  </shape>' . "\n";
+    $gcode .= ';  <pads>' . "\n";
+    for my $pad (@{$self->{padlist}}){
+        $gcode .= ';    <pad x1="' . ($pad->{position}[0]-$pad->{size}[0]/2) . '" y1="' . ($pad->{position}[1]+$pad->{size}[1]/2) . '" x2="' . ($pad->{position}[0]+$pad->{size}[0]/2) . '" y2="' . ($pad->{position}[1]+$pad->{size}[1]/2) . '"/>' . "\n";
+    }
+    $gcode .= ';  </pads>' . "\n";
+    $gcode .= ';  <destination x="' . $newpos[0] . '" y="' . $newpos[1] . '" z="' . $newpos[2] . '" orientation="' . $self->{rotation}[2] . '"/>' . "\n";
+    $gcode .= ';</part>' . "\n";
+    $gcode .= '' . "\n";
+    
+    return $gcode;
 }
 
 package Slic3r::Electronics::ElectronicPad;

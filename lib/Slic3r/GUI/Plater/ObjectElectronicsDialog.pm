@@ -72,7 +72,7 @@ sub new {
     my $schematic = $self->{schematic} = $params{schematic};
     my $place = $self->{place} = 0;
     $self->{model_object}->update_bounding_box;
-    my $root_offset = $self->{root_offset} = $self->{model_object}->_bounding_box->center;
+    my $root_offset = $self->{schematic}->{root_offset} = $self->{model_object}->_bounding_box->center;
     
     my $configfile ||= Slic3r::decode_path(Wx::StandardPaths::Get->GetUserDataDir . "/electronics/electronics.ini");
     my $config = $self->{config};
@@ -418,6 +418,7 @@ sub new {
 sub createDefaultConfig {
     my $self = shift;
     my ($configfile) = @_;
+    $self->{config}->{_}{show_parts_on_higher_layers} = 0;
     $self->{config}->{_}{move_step} = 0.1;
     $self->{config}->{_}{footprint_extruder} = 0;
     $self->{config}->{_}{part_extruder} = 0;
@@ -528,7 +529,7 @@ sub load_print {
         for my $volume_idx (0..$#{$model_object->volumes}) {
             my $volume = $model_object->volumes->[$volume_idx];
             my $part = $self->findPartByVolume($volume);
-            if ($part && $part->{position}[2]-$part->{height} <= $height) {
+            if ($part && ($part->{position}[2]-$part->{height} <= $height || $self->{config}->{_}{show_parts_on_higher_layers})) {
                 $self->canvas->load_object($model_object,undef,[0],[$volume_idx]);
                 $part->{shown} = 1;
             }
@@ -552,9 +553,9 @@ sub load_print {
 sub placePart {
     my $self = shift;
     my ($part, $x, $y, $z) = @_;
-    my @offset = @{$self->{root_offset}};
-    $x = int(($x-$offset[0])*100)/100.0;
-    $y = int(($y-$offset[1])*100)/100.0;
+    my @offset = @{$self->{schematic}->{root_offset}};
+    $part->setPosition($x, $y, $z);
+    ($x,$y,$z) = $part->transformWorldtoObject(0,@offset);
     $part->setPosition($x, $y, $z);
     $self->displayPart($part);
     $self->reload_tree($self->findVolumeId($part->{volume}));
@@ -582,7 +583,7 @@ sub displayPart {
             @{$part->{position}} = ($x, $y, $z);
             @{$part->{rotation}} = ($xr, $yr, $zr);
         }
-        my $footprint_model = $part->getFootprintModel;
+        my $footprint_model = $part->getFootprintModel($self->{model_object}->instances->[0]->rotation);
             
         foreach my $object (@{$footprint_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
@@ -598,13 +599,13 @@ sub displayPart {
             }
         }
         
-        my $chip_model = $part->getPartModel($self->{config});
+        my $chip_model = $part->getPartModel($self->{config}, $self->{model_object}->instances->[0]->rotation);
             
         foreach my $object (@{$chip_model->objects}) {
             foreach my $volume (@{$object->volumes}) {
                 my $new_volume = $self->{model_object}->add_volume($volume);
                 $new_volume->set_modifier(0);
-                $new_volume->set_name($part->{name}."-Part");
+                $new_volume->set_name($part->{name}."-Component");
                 $new_volume->set_material_id(0);
                 
                 # set a default extruder value, since user can't add it manually
