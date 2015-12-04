@@ -13,7 +13,12 @@ use Slic3r::Geometry qw(deg2rad);
 #######################################################################
 sub getCube {
     my $self = shift;
-    my ($x,$y,$z,$dx,$dy,$dz) = @_;
+    my ($x,$y,$z,$dx,$dy,$dz,$rot) = @_;
+    if ($rot == 90 || $rot == 270) {
+        my $tmp = $dx;
+        $dx = $dy;
+        $dy = $tmp;
+    }
     $x -= $dx/2;
     $y -= $dy/2;
     my @triangles = ();
@@ -29,6 +34,7 @@ sub getCube {
     push @triangles, [[$x, $y, $z], [$x, $y, $z+$dz], [$x+$dx, $y, $z+$dz]]; #front 
     push @triangles, [[$x, $y, $z+$dz], [$x, $y+$dy, $z+$dz], [$x+$dx, $y+$dy, $z+$dz]]; #top
     push @triangles, [[$x, $y, $z+$dz], [$x+$dx, $y, $z+$dz], [$x+$dx, $y+$dy, $z+$dz]]; #top
+    
     return @triangles;
     
 }

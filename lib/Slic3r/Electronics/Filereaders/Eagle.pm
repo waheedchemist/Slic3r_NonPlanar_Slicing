@@ -135,11 +135,11 @@ sub readFile {
                                 $ymax = max($ymax, $y+$r);
                             }
                         }
-                        my $x = $xmax-$xmin+$config->{offset}{chip_x_offset};
-                        my $y = $ymax-$ymin+$config->{offset}{chip_y_offset};
-                        my $z = $newpart->getPartheight($config)+$config->{offset}{chip_z_offset};
-                        $newpart->setPartsize($x,$y,$z);
-                        $newpart->setPartpos(($xmax-abs($xmin))/2,($ymax-abs($ymin))/2,0);
+                        my $x = $xmax-$xmin;
+                        my $y = $ymax-$ymin;
+                        my $z = $newpart->getPartheight($config);
+                        $newpart->setPartsize($x+$config->{offset}{chip_x_offset},$y+$config->{offset}{chip_y_offset},$z+$config->{offset}{chip_z_offset});
+                        $newpart->setPartpos($xmax-$x/2,$ymax-$y/2,0);
                         push @{$schematic->{partlist}}, $newpart;
                     } else {
                         print $part, " has no package assigned.\n";

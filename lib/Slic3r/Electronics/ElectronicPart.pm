@@ -181,7 +181,7 @@ sub getFootprintModel {
     my @triangles = ();
     for my $pad (@{$self->{padlist}}) {
         if ($pad->{type} eq 'smd') {
-            push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$pad->{position}}, ($pad->{size}[0], $pad->{size}[1], $self->{height}*(-1)));
+            push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$pad->{position}}, ($pad->{size}[0], $pad->{size}[1], $self->{height}*(-1)), $pad->{rotation}[2]);
         }
         if ($pad->{type} eq 'pad') {
             push @triangles, Slic3r::Electronics::Geometrics->getCylinder(@{$pad->{position}}, $pad->{drill}/2+0.25, $self->{height}*(-1));
@@ -201,7 +201,7 @@ sub getPartModel {
     my $self = shift;
     my ($config, $rot) = @_;
     my @triangles = ();
-    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config));
+    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config), $self->{rotation}[2]);
     my $model = $self->getTriangleMesh($rot, @triangles);
     return $model;
 }
