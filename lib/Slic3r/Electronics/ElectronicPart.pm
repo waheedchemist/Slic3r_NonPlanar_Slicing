@@ -207,7 +207,7 @@ sub getPartModel {
 }
 
 #######################################################################
-# Purpose    : Converts triagles to a triaglesMesh
+# Purpose    : Converts triagles to a triaglesMesh 
 # Parameters : Triagles to convert
 # Returns    : a Model
 # Commet     : Translates and rotates the model
