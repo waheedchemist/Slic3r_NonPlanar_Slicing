@@ -201,7 +201,7 @@ sub getPartModel {
     my $self = shift;
     my ($config, $rot) = @_;
     my @triangles = ();
-    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config), $self->{rotation}[2]);
+    push @triangles, Slic3r::Electronics::Geometrics->getCube(@{$self->{componentpos}}, $self->getPartsize($config), 0);
     my $model = $self->getTriangleMesh($rot, @triangles);
     return $model;
 }
