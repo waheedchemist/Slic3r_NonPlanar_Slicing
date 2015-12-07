@@ -230,7 +230,7 @@ sub getTriangleMesh {
     $mesh->repair;
     $mesh->rotate_x(deg2rad($self->{rotation}[0])) if ($self->{rotation}[0] != 0);
     $mesh->rotate_y(deg2rad($self->{rotation}[1])) if ($self->{rotation}[1] != 0);
-    $mesh->rotate_z(deg2rad($self->{rotation}[2])) if ($self->{rotation}[2] != 0);
+    $mesh->rotate_z(deg2rad($self->{rotation}[2])+$rot);
     $mesh->translate($self->transformWorldtoObject($rot,(0,0,0)));
     
     
