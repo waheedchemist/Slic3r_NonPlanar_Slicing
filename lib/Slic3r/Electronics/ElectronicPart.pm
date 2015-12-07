@@ -27,6 +27,7 @@ sub new {
     $self->{volume} = undef;
     $self->{chipVolume} = undef;
     $self->{shown} = 0;
+    $self->{printed} = 0;
     
     my @position = @{$self->{position}} = (undef,undef,undef);
     my @rotation = @{$self->{rotation}} = (0,0,0);
@@ -230,7 +231,7 @@ sub getTriangleMesh {
     $mesh->repair;
     $mesh->rotate_x(deg2rad($self->{rotation}[0])) if ($self->{rotation}[0] != 0);
     $mesh->rotate_y(deg2rad($self->{rotation}[1])) if ($self->{rotation}[1] != 0);
-    $mesh->rotate_z(deg2rad($self->{rotation}[2])) if ($self->{rotation}[2] != 0);
+    $mesh->rotate_z(deg2rad($self->{rotation}[2])+$rot);
     $mesh->translate($self->transformWorldtoObject($rot,(0,0,0)));
     
     
@@ -309,7 +310,7 @@ sub getPlaceGcode {
     my $self = shift;
     my ($printz, $id) = @_;
     my $gcode = "";
-    if (!defined($self->{printed}) && $self->getPlacementLayer <= $printz){
+    if ($self->{printed} == 0 && defined($self->{position}[2]) && $self->getPlacementLayer <= $printz){
         $self->{printed} = 1;
         $gcode .= ";pick part nr " . $id . "\n";
         $gcode .= "M361 P" . $id . "\n";
@@ -326,27 +327,27 @@ sub getPlaceGcode {
 sub getPlaceDescription {
     my $self = shift;
     my ($id,@offset) = @_;
-    my @newpos = $self->transformObjecttoWorld(0,@offset);
     my $gcode = "";
-    
-    $gcode .= ';<part id="' . $id . '" name="' . $self->{name} . '">' . "\n";
-    $gcode .= ';  <position box="'.$id.'"/>' . "\n";
-    $gcode .= ';  <size height="'.$self->{componentsize}[2].'"/>' . "\n";
-    $gcode .= ';  <shape>' . "\n";
-    $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
-    $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
-    $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
-    $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
-    $gcode .= ';  </shape>' . "\n";
-    $gcode .= ';  <pads>' . "\n";
-    for my $pad (@{$self->{padlist}}){
-        $gcode .= ';    <pad x1="' . ($pad->{position}[0]-$pad->{size}[0]/2) . '" y1="' . ($pad->{position}[1]-$pad->{size}[1]/2) . '" x2="' . ($pad->{position}[0]+$pad->{size}[0]/2) . '" y2="' . ($pad->{position}[1]+$pad->{size}[1]/2) . '"/>' . "\n";
+    if ($self->{printed}){
+        my @newpos = $self->transformObjecttoWorld(0,@offset);
+        $gcode .= ';<part id="' . $id . '" name="' . $self->{name} . '">' . "\n";
+        $gcode .= ';  <position box="'.$id.'"/>' . "\n";
+        $gcode .= ';  <size height="'.$self->{componentsize}[2].'"/>' . "\n";
+        $gcode .= ';  <shape>' . "\n";
+        $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
+        $gcode .= ';    <point x="' . ($self->{componentpos}[0]-$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
+        $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]+$self->{componentsize}[1]/2) . '"/>' . "\n";
+        $gcode .= ';    <point x="' . ($self->{componentpos}[0]+$self->{componentsize}[0]/2) . '" y="' . ($self->{componentpos}[1]-$self->{componentsize}[1]/2) . '"/>' . "\n";
+        $gcode .= ';  </shape>' . "\n";
+        $gcode .= ';  <pads>' . "\n";
+        for my $pad (@{$self->{padlist}}){
+            $gcode .= ';    <pad x1="' . ($pad->{position}[0]-$pad->{size}[0]/2) . '" y1="' . ($pad->{position}[1]-$pad->{size}[1]/2) . '" x2="' . ($pad->{position}[0]+$pad->{size}[0]/2) . '" y2="' . ($pad->{position}[1]+$pad->{size}[1]/2) . '"/>' . "\n";
+        }
+        $gcode .= ';  </pads>' . "\n";
+        $gcode .= ';  <destination x="' . $newpos[0] . '" y="' . $newpos[1] . '" z="' . $newpos[2] . '" orientation="' . $self->{rotation}[2] . '"/>' . "\n";
+        $gcode .= ';</part>' . "\n";
+        $gcode .= ';' . "\n";
     }
-    $gcode .= ';  </pads>' . "\n";
-    $gcode .= ';  <destination x="' . $newpos[0] . '" y="' . $newpos[1] . '" z="' . $newpos[2] . '" orientation="' . $self->{rotation}[2] . '"/>' . "\n";
-    $gcode .= ';</part>' . "\n";
-    $gcode .= '' . "\n";
-    
     return $gcode;
 }
 
