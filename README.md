@@ -7,6 +7,11 @@
 
 * https://tams.informatik.uni-hamburg.de/publications/2018/MSc_Daniel_Ahlers.pdf
 
+* https://hackaday.com/2016/07/27/3d-printering-non-planar-layer-fdm/
+
+* https://github.com/makertum/non-planar-layer-fdm
+
+
 ## How to build
 
 ### Run as Linux application in Windows
