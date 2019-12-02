@@ -2,7 +2,8 @@
 ###See: 
 
 https://tams.informatik.uni-hamburg.de/research/3d-printing/nonplanar_printing/index.php
-
+http://makertum.com/de/detaillierte-slic3r-einstellungen-guideline/
+https://tams.informatik.uni-hamburg.de/publications/2018/MSc_Daniel_Ahlers.pdf
 
 ## How to build
 
